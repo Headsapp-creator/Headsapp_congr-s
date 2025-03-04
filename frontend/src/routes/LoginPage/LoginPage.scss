@@ -1,0 +1,204 @@
+.login-container {
+  display: flex;
+  width: 900px;
+  height: 500px;
+  margin: 100px auto;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+
+  .login-left {
+    flex: 1;
+    padding: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    h2 {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      margin-right: 60px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      max-width: 300px;
+      margin:  8 auto;
+
+      .input-group {
+        position: relative;
+        width: 100%;
+        height: 50px;
+        margin-bottom: 15px;
+        background: #f3f4f6;
+        border-radius: 10px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+
+        label {
+          font-size: 12px;
+          font-weight: bold;
+          color: #6b7280;
+          position: absolute;
+          top: 8px;
+          left: 12px;
+        }
+
+        input {
+          width: 100%;
+          border: none;
+          outline: none;
+          background: transparent;
+          font-size: 14px;
+          padding: 20px 0 5px;
+        }
+
+        input:focus + label {
+          color: #10b981;
+        }
+      }
+
+      .password-group {
+        position: relative;
+
+        .show-password {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: #6b7280;
+        }
+      }
+
+      .options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+
+        .checkbox-container {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          position: relative;
+
+          input {
+            display: none;
+          }
+
+          .checkmark {
+            width: 16px;
+            height: 16px;
+            border: 1px solid #6b7280;
+            border-radius: 3px;
+            display: inline-block;
+            position: relative;
+            margin-right: 8px;
+          }
+
+          input:checked + .checkmark::after {
+            content: "";
+            width: 6px;
+            height: 12px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            position: absolute;
+            left: 4px;
+            top: 1px;
+            transform: rotate(45deg);
+            background-color: #10b981;
+          }
+        }
+
+        .forgot-password {
+          color: #059669;
+          text-decoration: none;
+          font-weight: bold;
+          font-size: 14px;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+
+      .sign-in-btn {
+        padding: 12px;
+        background-color: #10b981;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background 0.3s ease-in-out;
+        margin-bottom: 10px;
+
+        &:hover {
+          background-color: #059669;
+        }
+      }
+      .switch-page {
+        text-align: center;
+        margin-top: 10px;
+        span {
+          color: #059669;
+          cursor: pointer;
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+
+      .or-divider {
+        text-align: center;
+        font-size: 14px;
+        font-weight: bold;
+        color: #6b7280;
+        margin: 15px 0;
+      }
+
+      .app-login {
+        padding: 12px;
+        background-color: #f3f4f6;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        color: #374151;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s ease-in-out;
+
+        &:hover {
+          background-color: #e5e7eb;
+        }
+      }
+    }
+  }
+
+  .login-right {
+    flex: 1;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+}

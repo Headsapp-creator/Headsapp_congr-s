@@ -1,0 +1,203 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb" 
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  PARTICIPANT
+  SPEAKER
+}
+
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  COMPLETED
+}
+
+model User {
+  id               String          @id @default(auto()) @map("_id") @db.ObjectId
+  nom              String
+  prenom           String
+  email            String          @unique
+  password         String
+  statut           String
+  role             UserRole
+  dateInscription  DateTime        @default(now())
+  
+  // Admin-specific fields
+  privileges       String[]
+  
+  // Participant-specific fields
+  statutInscription String?        @default("PENDING")
+  
+  // Speaker-specific fields
+  biographie       String?
+  specialite       String?
+  experience       Int?            @default(0)
+  
+  // Relations
+  documents        Document[]
+  sessions         Session[]
+  events           EventParticipant[]
+  comites          ComiteMember[]
+  badges           Badge[]
+  attestations     Attestation[]
+  
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model Badge {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  nom             String
+  description     String
+  imageUrl        String?         
+  dateAttribution DateTime        @default(now())
+  //date congré
+  // Relations
+  utilisateur     User            @relation(fields: [utilisateurId], references: [id])
+  utilisateurId   String          @db.ObjectId
+    //localisation congré
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Attestation {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  nom             String
+  description     String
+  dateEmission    DateTime        @default(now())
+ //background(image / logo)
+ //signature electronique
+ 
+  // Relations
+  utilisateur     User            @relation(fields: [utilisateurId], references: [id])
+  utilisateurId   String          @db.ObjectId
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Event {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  nom             String
+  dateDebut       DateTime
+  dateFin         DateTime
+  description     String
+  status          EventStatus     @default(DRAFT)
+  
+  // Relations
+  programmes      Programme[]
+  participants    EventParticipant[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model EventParticipant {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  event           Event           @relation(fields: [eventId], references: [id])
+  eventId         String          @db.ObjectId
+  user            User            @relation(fields: [userId], references: [id])
+  userId          String          @db.ObjectId
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Programme {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  nom             String
+  description     String
+  
+  // Relations
+  event           Event           @relation(fields: [eventId], references: [id])
+  eventId         String          @db.ObjectId
+  sessions        Session[]
+  location        Localisation    @relation(fields: [locationId], references: [id])
+  locationId      String          @db.ObjectId
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Session {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  titre           String
+  description     String?         
+  heureDebut      DateTime
+  heureFin        DateTime
+  
+  // Relations
+  programme       Programme       @relation(fields: [programmeId], references: [id])
+  programmeId     String          @db.ObjectId
+  speaker         User            @relation(fields: [speakerId], references: [id])
+  speakerId       String          @db.ObjectId
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Localisation {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  adresse         String
+  ville           String
+  coordonneesGPS  String          
+  programmes      Programme[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Comite {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  nom             String
+  
+  // Relations
+  membres         ComiteMember[]
+  documents       Document[]
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model ComiteMember {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  comite          Comite          @relation(fields: [comiteId], references: [id])
+  comiteId        String          @db.ObjectId
+  user            User            @relation(fields: [userId], references: [id])
+  userId          String          @db.ObjectId
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Document {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  nom             String
+  format          String
+  contenu         String?         
+  dateSoumission  DateTime        @default(now())
+  statut          DocumentStatus  @default(PENDING)
+  
+  // Relations
+  soumisPar       User            @relation(fields: [soumisParId], references: [id])
+  soumisParId     String          @db.ObjectId
+  comite          Comite?         @relation(fields: [comiteId], references: [id])
+  comiteId        String?         @db.ObjectId
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
