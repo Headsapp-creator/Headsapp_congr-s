@@ -38,7 +38,7 @@ const LoginPage = () => {
       localStorage.setItem("token", data.token);
 
       // Navigate to dashboard or home
-      navigate("/dashboard");
+      navigate("/");
     } catch (err) {
       setError(err.message);
     } finally {

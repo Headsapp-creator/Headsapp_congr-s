@@ -1,0 +1,150 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+    width: 100%;
+    position: relative; /* Ensure position relative for absolute children */
+  
+    .nav-left {
+      display: flex;
+      align-items: center;
+  
+      .logo {
+        height: 40px;
+        margin-right: 10px;
+      }
+  
+      .app-name {
+        font-size: 20px;
+        font-weight: bold;
+        color: #00bfa6;
+      }
+    }
+  
+    .nav-right {
+      display: flex;
+      align-items: center;
+  
+      .profile-section {
+        display: flex;
+        align-items: center;
+        position: relative;
+  
+        .search-logout-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        
+            .search-icon {
+                font-size: 20px;
+                color: #008f7a;
+                cursor: pointer;
+                transition: transform 0.3s ease;
+                &:hover {
+                  transform: scale(1.2);
+                }
+              }
+        
+            .logout-button {
+              display: flex;
+              align-items: center;
+              background: none;
+              border: 2px solid #00bfa6;
+              color: #00bfa6;
+              padding: 5px 15px;
+              border-radius: 5px;
+              cursor: pointer;
+              transition: background-color 0.3s, color 0.3s;
+              
+              &:hover {
+                background-color: red;   /* Red background on hover */
+                color: white;            /* White text on hover */
+                border-color: red;       /* Red border on hover */
+              }
+        
+              svg {
+                margin-right: 5px;
+              }
+            }
+          }
+  
+        .profile-photo-wrapper {
+          position: relative;
+          margin-left: 20px; 
+  
+          .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            &:hover {
+              transform: scale(1.1);
+            }
+          }
+  
+          .dropdown-menu {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background:linear-gradient(135deg, #00bfa6, #008f7a);
+            border-radius: 5px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            width: 150px;
+             /* Adding a cool hover effect */
+          a {
+            text-decoration: none;
+            color: #fff;
+            margin: 10px 0;
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 8px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s ease;
+
+            &:hover {
+              background-color: rgba(255, 255, 255, 0.2);
+              transform: translateX(5px);
+            }
+          }
+
+          /* Make the dropdown visible on profile hover */
+          .profile-photo-wrapper:hover & {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0s;
+          }
+        
+          }
+        }
+      }
+  
+      .login-register-buttons {
+        display: flex;
+        gap: 15px;
+  
+        .nav-button {
+          padding: 8px 20px;
+          background-color: #00bfa6;
+          color: white;
+          font-weight: 600;
+          border-radius: 30px;
+          border: none;
+          transition: all 0.3s ease;
+          cursor: pointer;
+          text-decoration: none;
+  
+          &:hover {
+            background-color: #008f7a;
+            transform: scale(1.05);
+          }
+        }
+      }
+    }
+  }
+  

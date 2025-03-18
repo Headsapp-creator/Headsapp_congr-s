@@ -46,6 +46,13 @@ model User {
   specialite       String?
   experience       Int?            @default(0)
   
+  // Fields for email verification and password reset
+  isVerified            Boolean        @default(false)
+  verificationToken     Int?         
+  verificationTokenExpiresAt DateTime?   @default(now())
+  resetPasswordToken    Int?
+  resetPasswordExpiresAt DateTime?
+  lastLogin DateTime?
   // Relations
   documents        Document[]
   sessions         Session[]
@@ -96,6 +103,7 @@ model Event {
   dateDebut       DateTime
   dateFin         DateTime
   description     String
+  image           String?
   status          EventStatus     @default(DRAFT)
   
   // Relations

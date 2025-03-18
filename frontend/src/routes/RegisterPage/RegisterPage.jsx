@@ -5,9 +5,11 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import "./RegisterPage.scss";
 import img from "../../assets/hd.png"; 
+import PasswordStrengthMeter from "../../components/PasswordStrengthMeter/PasswordStrengthMeter";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const [password, setPassword] = useState(""); // State for password
 
   const formik = useFormik({
     initialValues: {
@@ -22,7 +24,7 @@ const RegisterPage = () => {
       email: Yup.string().email("Invalid email address").required("required"),
       password: Yup.string().min(8, "Password must be at least 8 characters").required("required"),
       confirmPassword: Yup.string()
-        .oneOf([Yup.ref('password'), null], "not match")
+        .oneOf([Yup.ref("password"), null], "not match")
         .required("required"),
       terms: Yup.boolean().oneOf([true], "You must accept the terms and conditions"),
     }),
@@ -37,8 +39,7 @@ const RegisterPage = () => {
     
         const data = await response.json();
         if (response.ok) {
-          localStorage.setItem("token", data.token);
-          navigate("/dashboard"); // Redirect after successful registration
+          navigate("/verify-email"); // Redirect after successful registration
         } else {
           alert(data.error);
         }
@@ -51,7 +52,7 @@ const RegisterPage = () => {
   return (
     <motion.div
       className="register-container"
-      initial={{ x: "100%" , opacity: 0 }}
+      initial={{ x: "100%", opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: "100%", opacity: 0 }} 
       transition={{ duration: 0.6, ease: "easeInOut" }}
@@ -104,13 +105,17 @@ const RegisterPage = () => {
               type="password"
               name="password"
               value={formik.values.password}
-              onChange={formik.handleChange}
+              onChange={(e) => {
+                setPassword(e.target.value); // Update password state for strength meter
+                formik.handleChange(e); // Keep formik in sync
+              }}
               onBlur={formik.handleBlur}
               placeholder="Create a strong password"
             />
             {formik.touched.password && formik.errors.password ? (
               <span className="error">{formik.errors.password}</span>
             ) : null}
+            
           </div>
 
           <div className="input-group">
@@ -126,6 +131,7 @@ const RegisterPage = () => {
             {formik.touched.confirmPassword && formik.errors.confirmPassword ? (
               <span className="error">{formik.errors.confirmPassword}</span>
             ) : null}
+           
           </div>
 
           <div className="checkbox-group">
@@ -137,16 +143,23 @@ const RegisterPage = () => {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
             />
-            <label htmlFor="terms">I agree to the <span>Terms & Conditions</span></label>
-            
+            <label htmlFor="terms">
+              I agree to the <span>Terms & Conditions</span>
+            </label>
           </div>
-          <div className="checkbox-group">
-          {formik.touched.terms && formik.errors.terms ? (
+
+          <div className="checkbox-group1">
+            {formik.touched.terms && formik.errors.terms ? (
               <div className="error">{formik.errors.terms}</div>
             ) : null}
+          </div>
+
+          <div className="password-strength-container">
+            {/* Password Strength Meter */}
+            <PasswordStrengthMeter password={password} />
             </div>
 
-          <button type="submit" className="sign-up-btn" >Sign Up</button>
+          <button type="submit" className="sign-up-btn">Sign Up</button>
 
           <p className="switch-page">
             Already have an account? 

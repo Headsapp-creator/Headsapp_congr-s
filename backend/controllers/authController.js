@@ -1,133 +1,236 @@
-import axios from "axios";
-import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
-import dotenv from "dotenv";
 import bcrypt from "bcrypt";
+import { PrismaClient } from "@prisma/client";
+import jwt from "jsonwebtoken";
+import { sendPasswordResetEmail, sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/email.js";
 
-dotenv.config();
 const prisma = new PrismaClient();
 
-const EXTERNAL_API_URL = process.env.EXTERNAL_API_URL;
 const JWT_SECRET = process.env.JWT_SECRET || "your_secret_key";
 
-
-const generateToken = (user) => {
-  return jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, {
+const generateTokenAndSetCookie = (res, user) => {
+  const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, {
     expiresIn: "7d",
     algorithm: "HS256",
   });
+  res.cookie("token", token, {
+		httpOnly: true,
+		secure: process.env.NODE_ENV === "production",
+		sameSite: "strict",
+		maxAge: 7 * 24 * 60 * 60 * 1000,
+	});
+  return token
 };
 
-export const authorizeRoles = (roles) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ error: "Access denied" });
+export const signup = async (req, res) => {
+  const { email, password, fullName } = req.body;
+
+  try {
+    if (!email || !password || !fullName) {
+      throw new Error("All fields are required");
     }
-    next();
-  };
+
+    const userAlreadyExists = await prisma.user.findUnique({ where: { email } });
+    if (userAlreadyExists) {
+      return res.status(400).json({ success: false, message: "User already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const nameParts = fullName.split(" ");
+    const prenom = nameParts.slice(0, -1).join(" ") || fullName;
+    const nom = nameParts[nameParts.length - 1] || "Unknown";
+
+    const verificationToken = Math.floor(100000 + Math.random() * 900000);
+
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        nom,
+        prenom,
+        statut: "ACTIVE",
+        role: "PARTICIPANT", // default role
+        statutInscription: "PENDING", // default status
+        privileges: [],
+        verificationToken,
+        verificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // expires in 24 hours
+      },
+    });
+
+    await sendVerificationEmail(user.email, verificationToken);
+
+    
+
+    res.status(201).json({
+      success: true,
+      message: "User created successfully",
+      user: { ...user, password: undefined }, // exclude password from the response
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
 };
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Step 1: Check local database first
-    let user = await prisma.user.findUnique({ where: { email } });
-
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      // Step 2: If not found locally, check the external API
-      const response = await axios.post(EXTERNAL_API_URL, { email, password });
-
-      if (!response.data.success) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-
-      const userData = response.data.user;
-
-      // Step 3: Hash the password before storing it in the database
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      user = await prisma.user.create({
-        data: {
-          id: userData.id,
-          nom: userData.nom,
-          prenom: userData.prenom,
-          email: userData.email,
-          statut: userData.statut,
-          role: userData.role,
-          privileges: userData.privileges || [],
-          statutInscription: userData.statutInscription || "PENDING",
-          biographie: userData.biographie || null,
-          specialite: userData.specialite || null,
-          experience: userData.experience || 0,
-          password: hashedPassword, // Store the hashed password
-        },
-      });
-    }
-
-    // Step 4: Ensure password comparison with bcrypt
-    if (!user.password) {
-      return res.status(401).json({ error: "Password is missing" });
+      return res.status(400).json({ success: false, message: "Invalid credentials" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(400).json({ success: false, message: "Invalid credentials" });
     }
 
-    // Step 5: Generate secure JWT
-    const token = generateToken(user);
+    generateTokenAndSetCookie(res , user);
 
-    return res.json({ token, user });
+    user.lastLogin = new Date();
+    await prisma.user.update({ where: { id: user.id }, data: { lastLogin: user.lastLogin } });
+
+    res.status(200).json({
+      success: true,
+      message: "Logged in successfully",
+      user: { ...user, password: undefined }, // exclude password from the response
+    });
   } catch (error) {
-    console.error("Login Error:", error);
-    return res.status(500).json({ error: "Authentication service error" });
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
-
-export const register = async (req, res) => {
-  const { fullName, email, password } = req.body;
+export const verifyEmail = async (req, res) => {
+  const { code } = req.body;
 
   try {
-    // Check if the email already exists
-    const existingUser = await prisma.user.findUnique({ where: { email } });
-
-    if (existingUser) {
-      return res.status(400).json({ error: "Email already in use" });
+    
+    if (!code) {
+      return res.status(400).json({
+        success: false,
+        message: "Verification code is required"
+      });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    const user = await prisma.user.findFirst({
+      where: { verificationToken: code },
+    });
 
-    // Split full name into first name (prenom) and last name (nom)
-    const nameParts = fullName.split(" ");
-    const prenom = nameParts.slice(0, -1).join(" ") || fullName;
-    const nom = nameParts[nameParts.length - 1] || "Unknown";
+    
+    if (!user) {
+      
+      return res.status(400).json({
+        success: false,
+        message: "No user found with the given verification token.",
+      });
+    }
 
-    // Create new user
-    const newUser = await prisma.user.create({
+    
+    if (user.verificationTokenExpiresAt < new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: "Token expired.",
+      });
+    }
+
+    
+    await prisma.user.update({
+      where: { id: user.id },
       data: {
-        nom,
-        prenom,
-        email,
-        password: hashedPassword, // Store the hashed password
-        statut: "ACTIVE",
-        role: "PARTICIPANT", // Default role
-        privileges: [],
-        statutInscription: "PENDING",
-        biographie: null,
-        specialite: null,
-        experience: 0,
+        isVerified: true,
+        verificationToken: null,
+        verificationTokenExpiresAt: null,
       },
     });
 
-    // Generate JWT
-    const token = generateToken(newUser);
 
-    return res.status(201).json({ token, user: newUser });
+    
+    await sendWelcomeEmail(user.email, user.nom);
+    generateTokenAndSetCookie(res,user);
+    
+    res.status(200).json({
+      success: true,
+      message: "Email verified successfully. /n Welcome email sent.",
+      user: { ...user, password: undefined },
+    });
+
   } catch (error) {
-    console.error("Registration Error:", error);
-    return res.status(500).json({ error: "Registration service error" });
+    console.error("Error during email verification:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
+};
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return res.status(400).json({ success: false, message: "User not found" });
+    }
+
+    const resetToken = Math.random().toString(36).substring(2, 15); // simple token generator
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); // expires in 1 hour
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { resetPasswordToken: resetToken, resetPasswordExpiresAt: user.resetPasswordExpiresAt },
+    });
+
+    await sendPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
+
+    res.status(200).json({ success: true, message: "Password reset link sent to your email" });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { resetPasswordToken: token, resetPasswordExpiresAt: { gt: new Date() } },
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpiresAt = null;
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword, resetPasswordToken: null, resetPasswordExpiresAt: null },
+    });
+
+    res.status(200).json({ success: true, message: "Password reset successful" });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+export const checkAuth = async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.userId } });
+    if (!user) {
+      return res.status(400).json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+export const logout = async (req, res) => {
+	res.clearCookie("token");
+	res.status(200).json({ success: true, message: "Logged out successfully" });
 };

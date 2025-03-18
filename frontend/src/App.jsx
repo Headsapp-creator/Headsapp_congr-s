@@ -1,22 +1,28 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import { AnimatePresence } from "framer-motion";
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigationType } from "react-router-dom";
 
 import "./styles/global.scss";
 import LoginPage from "./routes/LoginPage/LoginPage";
 import RegisterPage from "./routes/RegisterPage/RegisterPage";
+import HomePage from "./routes/HomePage/HomePage";
+import EmailVerificationPage from "./routes/EmailVerificationPage/EmailVerificationPage";
+// import EventDetailPage from "./routes/EventDetailPage/EventDetailPage"; // Uncomment if needed
 
-function AnimatedRoutes() {
+const AnimatedRoutes = () => {
   const location = useLocation();
+  const navigationType = useNavigationType();
+  const animation = navigationType === "PUSH" ? "slide-left" : "slide-right";
 
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
+    <div className={`animated-route ${animation}`}>
+      <Routes location={location}>
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify-email" element={<EmailVerificationPage />} /> 
       </Routes>
-    </AnimatePresence>
+    </div>
   );
-}
+};
 
 function App() {
   return (

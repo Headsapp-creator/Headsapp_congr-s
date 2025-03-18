@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.route.js"
+import userRoutes from "./routes/user.route.js";
+import eventRoutes from "./routes/event.route.js"
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -21,7 +23,8 @@ app.use(limiter);
 
 
 app.use("/auth", authRoutes);
-
+app.use("/users", userRoutes);
+app.use("/events", eventRoutes)
  
 
 const PORT = process.env.PORT || 5000;
