@@ -1,15 +1,18 @@
-import React, { useState } from "react";
+/* eslint-disable no-unused-vars */
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Eye, EyeOff } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import "./RegisterPage.scss";
-import img from "../../assets/hd.png"; 
+import img from "../../assets/hd.png";
 import PasswordStrengthMeter from "../../components/PasswordStrengthMeter/PasswordStrengthMeter";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
   const [password, setPassword] = useState(""); // State for password
+  const [showPassword, setShowPassword] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -22,26 +25,35 @@ const RegisterPage = () => {
     validationSchema: Yup.object({
       fullName: Yup.string().required("required"),
       email: Yup.string().email("Invalid email address").required("required"),
-      password: Yup.string().min(8, "Password must be at least 8 characters").required("required"),
-      confirmPassword: Yup.string()
-        .oneOf([Yup.ref("password"), null], "not match")
+      password: Yup.string()
+        .min(8)
+        .matches(/[A-Z]/)
+        .matches(/[a-z]/)
+        .matches(/\d/)
+        .matches(/[^A-Za-z0-9]/)
         .required("required"),
-      terms: Yup.boolean().oneOf([true], "You must accept the terms and conditions"),
+      confirmPassword: Yup.string()
+        .oneOf([Yup.ref("password"), null], "Passwords must match")
+        .required("required"),
+      terms: Yup.boolean().oneOf([true], "You must accept the terms and conditions").required(),
     }),
-    
+
     onSubmit: async (values) => {
+      console.log(values); 
       try {
-        const response = await fetch("http://localhost:5000/auth/register", {
+        const response = await fetch("http://localhost:5000/auth/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify(values),
         });
-    
+
         const data = await response.json();
         if (response.ok) {
-          navigate("/verify-email"); // Redirect after successful registration
+          navigate("/");
         } else {
-          alert(data.error);
+          alert(data.message || "Registration failed");
+          console.error(data); 
         }
       } catch (error) {
         console.error("Registration failed:", error);
@@ -54,14 +66,14 @@ const RegisterPage = () => {
       className="register-container"
       initial={{ x: "100%", opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      exit={{ x: "100%", opacity: 0 }} 
+      exit={{ x: "100%", opacity: 0 }}
       transition={{ duration: 0.6, ease: "easeInOut" }}
     >
       <motion.div
         className="register-right"
         initial={{ x: "-100%" }}
         animate={{ x: 0 }}
-        exit={{ x: "100%" }} 
+        exit={{ x: "100%" }}
         transition={{ duration: 0.6, ease: "easeInOut" }}
       >
         <img src={img} alt="Register" />
@@ -99,23 +111,30 @@ const RegisterPage = () => {
             ) : null}
           </div>
 
-          <div className="input-group">
+          <div className="input-group password-group">
             <label>Password</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               value={formik.values.password}
               onChange={(e) => {
-                setPassword(e.target.value); // Update password state for strength meter
-                formik.handleChange(e); // Keep formik in sync
+                setPassword(e.target.value);
+                formik.handleChange(e);
               }}
               onBlur={formik.handleBlur}
               placeholder="Create a strong password"
             />
-            {formik.touched.password && formik.errors.password ? (
-              <span className="error">{formik.errors.password}</span>
-            ) : null}
-            
+            <button
+              type="button"
+              className="show-password"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+            {/* Show error message only if the password has been touched and is invalid */}
+            {formik.touched.password && formik.errors.password && !formik.values.password && (
+              <span className="error">required</span>
+            )}
           </div>
 
           <div className="input-group">
@@ -131,7 +150,7 @@ const RegisterPage = () => {
             {formik.touched.confirmPassword && formik.errors.confirmPassword ? (
               <span className="error">{formik.errors.confirmPassword}</span>
             ) : null}
-           
+
           </div>
 
           <div className="checkbox-group">
@@ -157,12 +176,12 @@ const RegisterPage = () => {
           <div className="password-strength-container">
             {/* Password Strength Meter */}
             <PasswordStrengthMeter password={password} />
-            </div>
+          </div>
 
           <button type="submit" className="sign-up-btn">Sign Up</button>
 
           <p className="switch-page">
-            Already have an account? 
+            Already have an account?
             <span onClick={() => navigate("/login")}> Sign in</span>
           </p>
         </form>

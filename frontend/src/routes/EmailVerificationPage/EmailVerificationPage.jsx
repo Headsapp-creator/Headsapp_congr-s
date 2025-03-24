@@ -1,3 +1,5 @@
+
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -11,31 +13,38 @@ const EmailVerificationPage = () => {
 	const inputRefs = useRef([]);
 	const navigate = useNavigate();
 
-	const handleChange = (index, value) => {
+	const handlePaste = (e) => {
+		e.preventDefault();
+		const pastedData = e.clipboardData.getData("text").slice(0, 6).split("");
+
 		const newCode = [...code];
+		for (let i = 0; i < 6; i++) {
+			newCode[i] = pastedData[i] || "";
+		}
 
-		// Handle pasted content
-		if (value.length > 1) {
-			const pastedCode = value.slice(0, 6).split("");
-			for (let i = 0; i < 6; i++) {
-				newCode[i] = pastedCode[i] || "";
-			}
-			setCode(newCode);
+		setCode(newCode);
 
-			// Focus on the last non-empty input or the first empty one
-			const lastFilledIndex = newCode.findLastIndex((digit) => digit !== "");
-			const focusIndex = lastFilledIndex < 5 ? lastFilledIndex + 1 : 5;
-			inputRefs.current[focusIndex]?.focus();
-		} else {
-			newCode[index] = value;
-			setCode(newCode);
+		// Move focus to the last filled input or the next empty one
+		const lastFilledIndex = newCode.findLastIndex((digit) => digit !== "");
+		const focusIndex = lastFilledIndex < 5 ? lastFilledIndex + 1 : 5;
+		inputRefs.current[focusIndex]?.focus();
+	};
 
-			// Move focus to the next input field if value is entered
-			if (value && index < 5) {
-				inputRefs.current[index + 1]?.focus();
-			}
+	const handleChange = (index, value) => {
+		if (!/^\d*$/.test(value)) return; // Allow only numeric input
+
+		const newCode = [...code];
+		newCode[index] = value.slice(-1); // Ensure only one digit per input
+
+		setCode(newCode);
+
+		// Move focus to the next input field if a digit is entered
+		if (value && index < 5) {
+			inputRefs.current[index + 1]?.focus();
 		}
 	};
+
+
 
 	const handleKeyDown = (index, e) => {
 		if (e.key === "Backspace" && !code[index] && index > 0) {
@@ -102,6 +111,7 @@ const EmailVerificationPage = () => {
 								value={digit}
 								onChange={(e) => handleChange(index, e.target.value)}
 								onKeyDown={(e) => handleKeyDown(index, e)}
+								onPaste={handlePaste}
 								className="verification-input"
 							/>
 						))}
@@ -120,8 +130,8 @@ const EmailVerificationPage = () => {
 			</motion.div>
 		</div>
 	);
-	
-	
+
+
 };
 
 export default EmailVerificationPage;

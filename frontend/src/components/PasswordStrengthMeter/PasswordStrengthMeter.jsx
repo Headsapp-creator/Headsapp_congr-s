@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 import React from "react";
 import { Check, X } from "lucide-react";
 import "./PasswordStrengthMeter.scss"; // Import the CSS file

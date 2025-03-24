@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from "react";
+/* eslint-disable no-unused-vars */
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import "./EventList.scss";
+import { AuthContext } from "../../context/AuthContext";
 
 const EventList = () => {
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
+  const { currentUser } = useContext(AuthContext);
 
   // Helper function to format the date
   const formatDate = (dateString) => {
@@ -21,7 +24,7 @@ const EventList = () => {
 
   // Fetch events data from the API
   useEffect(() => {
-    fetch("http://localhost:5000/events") 
+    fetch("http://localhost:5000/events")
       .then((res) => res.json())
       .then((data) => setEvents(data))
       .catch((err) => console.error(err));
@@ -29,10 +32,12 @@ const EventList = () => {
 
   // Handle event registration
   const handleRegister = (eventId) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    if (!currentUser) {
       alert("You need to login first!");
       navigate("/login");
+    } else if (!currentUser.isVerified) {
+      alert("Please verify your email before registering for events.");
+      navigate("/verify-email");
     } else {
       navigate(`/events/${eventId}`);
     }
@@ -47,8 +52,9 @@ const EventList = () => {
 
           return (
             <div key={event.id} className="event-card">
-                {console.log(event)}
-              <img src={event.image} alt={event.nom} className="event-img" />
+              <div className="event-img-container">
+                <img src={event.image} alt={event.nom} className="event-img" />
+              </div>
               <h3>{event.nom}</h3>
               <p>{event.description}</p>
               <span className="event-date">

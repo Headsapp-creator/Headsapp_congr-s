@@ -1,24 +1,28 @@
-import React, { useState, useEffect } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
+import React, { useState, useEffect, useContext  } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaSearch, FaSignOutAlt, FaUserCircle } from "react-icons/fa";
 import "./Navbar.scss";
-
+import img from "../../assets/icons/noavatar.jpg"
+import { AuthContext } from "../../context/AuthContext";
 const Navbar = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { currentUser, updateUser , fetchUser } = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
-
+  
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      const userData = JSON.parse(atob(token.split(".")[1]));
-      setUser(userData);
-    }
+    fetchUser(); 
   }, []);
+ 
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setUser(null);
+  const handleLogout = async () => {
+    await fetch("http://localhost:5000/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+
+    updateUser(null);
     navigate("/login");
   };
 
@@ -32,20 +36,20 @@ const Navbar = () => {
       </div>
 
       <div className="nav-right">
-        {!user ? (
+
+        {!currentUser ? (
           <div className="login-register-buttons">
-                        <Link to="/login" className="nav-button">events</Link>
-                        <Link to="/login" className="nav-button">sponsors</Link>
-                        <Link to="/login" className="nav-button">partenaires</Link>
+            
+            {/*<Link to="/login" className="nav-button">events</Link>
+            <Link to="/login" className="nav-button">sponsors</Link>
+            <Link to="/login" className="nav-button">partenaires</Link>
+            */}
 
             <Link to="/login" className="nav-button">Login</Link>
             <Link to="/register" className="nav-button">Register</Link>
           </div>
         ) : (
           <div className="profile-section">
-            <span>my events </span>
-            <span> // notif icon </span>
-            
             {/* Search and Logout Section */}
             <div className="search-logout-wrapper">
               {/* Logout Button */}
@@ -61,7 +65,7 @@ const Navbar = () => {
             {/* Profile Photo with Menu */}
             <div className="profile-photo-wrapper">
               <img
-                src={user.photo || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=200"}
+                src={currentUser.photo || img}
                 alt="Profile"
                 className="profile-pic"
                 onClick={() => setMenuOpen(!menuOpen)}

@@ -67,7 +67,20 @@
           right: 10px;
         }
       }
+      .password-group {
+        position: relative;
 
+        .show-password {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: #6b7280;
+        }
+      }
       .checkbox-group {
         display: flex;
         align-items: center;

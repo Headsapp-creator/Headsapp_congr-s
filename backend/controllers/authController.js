@@ -21,6 +21,28 @@ const generateTokenAndSetCookie = (res, user) => {
   return token
 };
 
+export const getUser = async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id }
+    });
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: "User not found" });
+    }
+
+    res.json({ success: true, user });
+  } catch (error) {
+    res.status(401).json({ success: false, message: "Invalid token" });
+  }
+};
+
 export const signup = async (req, res) => {
   const { email, password, fullName } = req.body;
 
@@ -41,7 +63,9 @@ export const signup = async (req, res) => {
     const nom = nameParts[nameParts.length - 1] || "Unknown";
 
     const verificationToken = Math.floor(100000 + Math.random() * 900000);
-
+    
+    
+    
     const user = await prisma.user.create({
       data: {
         email,
@@ -49,22 +73,23 @@ export const signup = async (req, res) => {
         nom,
         prenom,
         statut: "ACTIVE",
-        role: "PARTICIPANT", // default role
-        statutInscription: "PENDING", // default status
+        role: "PARTICIPANT",
+        statutInscription: "PENDING",
         privileges: [],
         verificationToken,
-        verificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // expires in 24 hours
+        verificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), 
+        lastLogin: new Date()
       },
     });
 
     await sendVerificationEmail(user.email, verificationToken);
 
-    
+    generateTokenAndSetCookie(res, user);
 
     res.status(201).json({
       success: true,
       message: "User created successfully",
-      user: { ...user, password: undefined }, // exclude password from the response
+      user: { ...user, password: undefined }, 
     });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -93,7 +118,7 @@ export const login = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Logged in successfully",
-      user: { ...user, password: undefined }, // exclude password from the response
+      user: { ...user, password: undefined }, 
     });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });

@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+/* eslint-disable no-unused-vars */
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import "./LoginPage.scss";
 import img from "../../assets/hd.png";
-
+import { AuthContext } from "../../context/AuthContext";
 const LoginPage = () => {
+  const { updateUser } = useContext(AuthContext); 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,26 +20,24 @@ const LoginPage = () => {
     e.preventDefault();
     setError("");
     setLoading(true);
-
+  
     try {
       const response = await fetch("http://localhost:5000/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", 
         body: JSON.stringify({ email, password }),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
-        throw new Error(data.error || "Login failed");
+        throw new Error(data.message || "Login failed");
       }
-
-      // Store JWT in localStorage
-      localStorage.setItem("token", data.token);
-
-      // Navigate to dashboard or home
+  
+      updateUser(data.user); 
       navigate("/");
     } catch (err) {
       setError(err.message);
@@ -45,6 +45,7 @@ const LoginPage = () => {
       setLoading(false);
     }
   };
+  
 
   return (
     <motion.div
@@ -105,7 +106,7 @@ const LoginPage = () => {
           <button className="app-login">HeadsApp</button>
 
           <p className="switch-page">
-            Don't have an account?
+            Don&apos;t have an account?
             <span onClick={() => navigate("/register")}> Sign up</span>
           </p>
         </form>
