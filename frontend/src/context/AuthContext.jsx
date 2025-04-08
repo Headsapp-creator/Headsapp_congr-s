@@ -8,12 +8,11 @@ export const AuthContext = createContext();
 export const AuthContextProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
 
-  // Function to fetch authenticated user from cookies
   const fetchUser = async () => {
     try {
       const response = await fetch("http://localhost:5000/auth/user", {
         method: "GET",
-        credentials: "include", 
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -27,12 +26,10 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  // Fetch user on mount
   useEffect(() => {
     fetchUser();
   }, []);
 
-  // Function to update the user manually if needed (e.g., after login/logout)
   const updateUser = (data) => {
     setCurrentUser(data);
   };

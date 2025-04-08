@@ -1,17 +1,20 @@
 import express from "express";
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 import {
   createEvent,
   getEvents,
   getEventById,
   updateEvent,
-  deleteEvent
+  deleteEvent,
+  subscribeToEvent,
+  getUserBadges
 } from "../controllers/eventController.js";
+
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Create Event (Only Admin)
+
 router.post(
   "/",
   verifyToken,
@@ -42,5 +45,21 @@ router.put(
 );
 
 router.delete("/:id", verifyToken, authorizeRoles(["ADMIN"]), deleteEvent);
+
+router.post(
+  "/:eventId/subscribe",
+  verifyToken,
+  [
+    param("eventId").notEmpty().withMessage("Event ID is required"),
+    body("programmeIds").isArray().withMessage("programmeIds must be an array")
+  ],
+  subscribeToEvent
+);
+
+router.get(
+  "/badges/:userId",
+  verifyToken,
+  getUserBadges
+);
 
 export default router;

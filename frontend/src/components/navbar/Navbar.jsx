@@ -1,8 +1,7 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useContext  } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaSearch, FaSignOutAlt, FaUserCircle } from "react-icons/fa";
+import { FaSearch, FaSignOutAlt } from "react-icons/fa";
 import "./Navbar.scss";
 import img from "../../assets/icons/noavatar.jpg"
 import { AuthContext } from "../../context/AuthContext";
@@ -13,6 +12,7 @@ const Navbar = () => {
   
   useEffect(() => {
     fetchUser(); 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
  
 

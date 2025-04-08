@@ -77,7 +77,7 @@ export const signup = async (req, res) => {
         statutInscription: "PENDING",
         privileges: [],
         verificationToken,
-        verificationTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), 
+        verificationTokenExpiresAt: new Date(Date.now() + 15 * 60 * 1000), 
         lastLogin: new Date()
       },
     });
