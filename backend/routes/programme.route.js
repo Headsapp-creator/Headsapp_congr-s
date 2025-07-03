@@ -5,7 +5,7 @@ import {
   getProgrammes,
   getProgrammeById,
   updateProgramme,
-  deleteProgramme
+  deleteProgramme,
 } from "../controllers/programmeController.js";
 import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
@@ -40,5 +40,6 @@ router.put(
 );
 
 router.delete("/:id", verifyToken, authorizeRoles(["ADMIN"]), deleteProgramme);
+
 
 export default router;

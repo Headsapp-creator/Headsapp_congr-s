@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useContext } from "react"; 
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";  
 import Navbar from "../../components/navbar/Navbar.jsx";
 import EventList from "../../components/EventList/EventList.jsx";
@@ -37,7 +38,7 @@ const HomePage = () => {
           </button>
         </div>
       )}
-      <EventList /> 
+      {/*<EventList /> */}
     </div>
   );
 };

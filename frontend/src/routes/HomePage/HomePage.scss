@@ -2,6 +2,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+      padding-top: 100px; // Add this line (adjust value if needed)
+
   }
   .verification-message {
     background-color: #f8d7da;  // Light red background
@@ -49,4 +51,28 @@
       outline: none;
     }
   }
-  
+ .soumission-top-btn-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin: 24px 0 12px 0;
+}
+
+.soumission-btn-page {
+  background: linear-gradient(90deg, #4f8cff 60%, #243056 100%);
+  color: #fff;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 10px 28px;
+  text-decoration: none;
+  font-size: 1.05rem;
+  box-shadow: 0 2px 8px rgba(79,140,255,0.08);
+  transition: background 0.2s, transform 0.2s;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  &:hover {
+    background: linear-gradient(90deg, #243056 60%, #4f8cff 100%);
+    transform: translateY(-2px) scale(1.04);
+  }
+}

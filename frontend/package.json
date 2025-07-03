@@ -10,11 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@chakra-ui/radio": "^2.1.2",
+    "@chakra-ui/react": "^3.19.1",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@mantine/hooks": "^7.17.0",
     "@tanstack/react-query": "^5.66.6",
     "formik": "^2.4.6",
-    "framer-motion": "^12.4.5",
+    "framer-motion": "^12.12.1",
     "joi": "^17.13.3",
     "joy": "^0.1.1",
     "lucide-react": "^0.475.0",

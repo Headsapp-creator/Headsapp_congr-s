@@ -4,6 +4,7 @@ import {
   PASSWORD_RESET_SUCCESS_TEMPLATE,
   VERIFICATION_EMAIL_TEMPLATE,
   WELCOME_EMAIL_TEMPLATE,
+  WELCOME_EMAIL_WITH_CREDENTIALS_TEMPLATE,
 } from "./emailTemplates.js";
 
 
@@ -14,6 +15,28 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,  
 },
 });
+
+export const sendWelcomeEmail2 = async (email, name, password = null) => {
+ let html = WELCOME_EMAIL_WITH_CREDENTIALS_TEMPLATE
+    .replace("{name}", name)
+    .replace("{email}", email)
+    .replace("{password}", password || "");
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "Welcome to HeadsApp Congrés",
+    html,
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Welcome email sent successfully", info.response);
+  } catch (error) {
+    console.error(`Error sending welcome email`, error);
+    throw new Error(`Error sending welcome email: ${error}`);
+  }
+};
 
 export const sendVerificationEmail = async (email, verificationToken) => {
   const mailOptions = {

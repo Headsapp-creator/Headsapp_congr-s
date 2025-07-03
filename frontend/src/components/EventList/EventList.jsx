@@ -39,7 +39,8 @@ const EventList = () => {
       alert("Please verify your email before registering for events.");
       navigate("/verify-email");
     } else {
-      navigate(`/events/${eventId}`);
+      navigate(`/events/${eventId}/register`);
+      
     }
   };
 

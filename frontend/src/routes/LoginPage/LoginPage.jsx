@@ -7,45 +7,51 @@ import "./LoginPage.scss";
 import img from "../../assets/hd.png";
 import { AuthContext } from "../../context/AuthContext";
 const LoginPage = () => {
-  const { updateUser } = useContext(AuthContext); 
+  const { updateUser } = useContext(AuthContext);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-  
+
     try {
       const response = await fetch("http://localhost:5000/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", 
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.message || "Login failed");
       }
-  
-      updateUser(data.user); 
-      navigate("/");
+
+      updateUser(data.user);
+
+      if (data.user.role === "ADMIN") {
+        window.location.href = "http://localhost:3000/admin/default";
+      } else if (data.user.role === "PARTICIPANT") {
+        navigate("/");
+      } else if (data.user.role === "COMMITTEE") {
+        navigate("/reviewer-dashboard");
+      }
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
-  
 
   return (
     <motion.div
@@ -61,9 +67,9 @@ const LoginPage = () => {
         <form onSubmit={handleLogin}>
           <div className="input-group">
             <label>Email</label>
-            <input 
-              type="email" 
-              required 
+            <input
+              type="email"
+              required
               placeholder="Example.email@gmail.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}

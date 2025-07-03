@@ -11,6 +11,7 @@ enum UserRole {
   ADMIN
   PARTICIPANT
   SPEAKER
+  COMMITTEE
 }
 
 enum DocumentStatus {
@@ -26,14 +27,17 @@ enum EventStatus {
 }
 
 model User {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
   nom             String
   prenom          String
-  email           String   @unique
-  password        String
-  statut          String
-  role            UserRole
-  dateInscription DateTime @default(now())
+  email           String    @unique
+  phone           String?
+  country         String?
+  address         String?
+  password        String    @default("Contact123*")
+  statut          String    @default("ACTIVE")
+  role            UserRole  @default(PARTICIPANT)
+  dateInscription DateTime? @default(now())
 
   // Admin-specific fields
   privileges String[]
@@ -47,9 +51,9 @@ model User {
   experience Int?    @default(0)
 
   // Fields for email verification and password reset
-  isVerified                 Boolean            @default(false)
+  isVerified                 Boolean                @default(false)
   verificationToken          Int?
-  verificationTokenExpiresAt DateTime?          @default(now())
+  verificationTokenExpiresAt DateTime?              @default(now())
   resetPasswordToken         Int?
   resetPasswordExpiresAt     DateTime?
   lastLogin                  DateTime?
@@ -59,11 +63,12 @@ model User {
   comites                    ComiteMember[]
   badges                     Badge[]
   attestations               Attestation[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  ParticipantProgramme ParticipantProgramme[]
+  communications             Communication[]
+  ParticipantProgramme       ParticipantProgramme[]
+  ReviewerAssignment         ReviewerAssignment[]
+  
+  createdAt                  DateTime               @default(now())
+  updatedAt                  DateTime               @updatedAt
 }
 
 model Badge {
@@ -74,15 +79,15 @@ model Badge {
   dateAttribution DateTime @default(now())
 
   // Relations
-  utilisateur     User     @relation(fields: [utilisateurId], references: [id])
-  utilisateurId   String   @db.ObjectId
-  event           Event    @relation(fields: [eventId], references: [id])
-  eventId         String   @db.ObjectId
+  utilisateur   User   @relation(fields: [utilisateurId], references: [id])
+  utilisateurId String @db.ObjectId
+  event         Event  @relation(fields: [eventId], references: [id])
+  eventId       String @db.ObjectId
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([utilisateurId, eventId]) 
+  @@unique([utilisateurId, eventId])
 }
 
 model Attestation {
@@ -102,20 +107,22 @@ model Attestation {
 }
 
 model Event {
-  id          String      @id @default(auto()) @map("_id") @db.ObjectId
-  nom         String
-  dateDebut   DateTime
-  dateFin     DateTime
-  description String
-  image       String?
-  status      EventStatus @default(DRAFT)
-
+  id                 String      @id @default(auto()) @map("_id") @db.ObjectId
+  nom                String
+  dateDebut          DateTime
+  dateFin            DateTime
+  description        String
+  image              String?
+  status             EventStatus @default(DRAFT)
+  capacity           Int?
+  selectedAttributes Json?
+  pricingSteps       Json?
+  activityOptions    Json?
   // Relations
-  programmes   Programme[]
+  programmes         Programme[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
 
   Badge Badge[]
 
@@ -126,33 +133,36 @@ model Programme {
   id          String @id @default(auto()) @map("_id") @db.ObjectId
   nom         String
   description String
+  capacity    Int?
+  price       Float?
 
   // Relations
-  event      Event        @relation(fields: [eventId], references: [id])
-  eventId    String       @db.ObjectId
-  sessions   Session[]
+  event    Event     @relation(fields: [eventId], references: [id])
+  eventId  String    @db.ObjectId
+  sessions Session[]
   //location   Localisation @relation(fields: [locationId], references: [id])
   //locationId String       @db.ObjectId
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-
 }
 
 model ParticipantProgramme {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
-  participantId String     @db.ObjectId
-  eventId       String     @db.ObjectId
-  programmeIds  String[]   
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  participantId       String   @db.ObjectId
+  eventId             String   @db.ObjectId
+  programmeIds        String[]
+  formData            Json?
+  takeoverDocumentUrl String? // <-- Add this line
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  checkedIn           Boolean  @default(false)
 
   // Relations
-  event         Event      @relation(fields: [eventId], references: [id])
-  participant   User       @relation(fields: [participantId], references: [id])
+  event       Event @relation(fields: [eventId], references: [id])
+  participant User  @relation(fields: [participantId], references: [id])
 
-  @@unique([participantId, eventId])  
+  @@unique([participantId, eventId])
 }
 
 model Session {
@@ -173,7 +183,7 @@ model Session {
 }
 
 model Localisation {
-  id             String      @id @default(auto()) @map("_id") @db.ObjectId
+  id             String @id @default(auto()) @map("_id") @db.ObjectId
   adresse        String
   ville          String
   coordonneesGPS String
@@ -218,6 +228,44 @@ model Document {
   soumisParId String  @db.ObjectId
   comite      Comite? @relation(fields: [comiteId], references: [id])
   comiteId    String? @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Communication {
+  id                  String               @id @default(auto()) @map("_id") @db.ObjectId
+  theme               String
+  speciality          String
+  title               String
+  mainAuthor          String
+  coAuthors           String
+  email               String
+  phone               String?
+  service             String
+  institution         String?
+  objectives          String
+  methods             String
+  results             String
+  filePath            String
+  conclusion          String
+  status              String               @default("pending")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  userId              String               @db.ObjectId
+  user                User                 @relation(fields: [userId], references: [id])
+  committee           String?
+  feedback            String?
+  reviewerAssignments ReviewerAssignment[] // <-- Add this line
+}
+
+model ReviewerAssignment {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  communication   Communication @relation(fields: [communicationId], references: [id])
+  communicationId String        @db.ObjectId
+  reviewer        User          @relation(fields: [reviewerId], references: [id])
+  reviewerId      String        @db.ObjectId
+  score           Float? 
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

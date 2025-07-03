@@ -5,5 +5,9 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-
+export const uploadToCloudinary = async (filePath) => {
+  return cloudinary.uploader.upload(filePath, {
+    folder: "communications",
+  });
+};
 export default cloudinary;
