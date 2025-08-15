@@ -37,7 +37,9 @@ export default function Marketplace() {
         let approved = 0, pending = 0, rejected = 0;
         data.forEach(comm => {
           const scores = comm.scores || [];
-          if (!scores.length) {
+          const members = comm.committeeMembers || [];
+          // If not all reviewers have set a score, it's pending
+          if (!scores.length || scores.length < members.length || scores.some(s => s === null || s === undefined)) {
             pending++;
           } else {
             let avg = scores.reduce((a, b) => a + b, 0) / scores.length;
@@ -61,10 +63,32 @@ export default function Marketplace() {
 
   return (
     <Box pt={{ base: "80px", md: "80px", xl: "80px" }}>
-      <Text mb={8} color="gray.500">
-        Manage all submitted communications and track their status
-      </Text>
 
+      {/* Color Code Documentation */}
+      <Box
+        mb={6}
+        p={4}
+        bg="gray.50"
+        borderRadius="md"
+        border="1px solid"
+        borderColor="gray.200"
+      >
+        <Text fontWeight="bold" mb={2}>Status Color Codes:</Text>
+        <Box display="flex" flexDirection="column" gap={3}>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Box w="16px" h="16px" bg="green.200" borderRadius="md" border="1px solid" borderColor="gray.300" />
+            <Text fontSize="sm">Approved (Average score ≥ 8)</Text>
+          </Box>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Box w="16px" h="16px" bg="orange.200" borderRadius="md" border="1px solid" borderColor="gray.300" />
+            <Text fontSize="sm">Pending (Not all reviewers have scored, or average score between 5 and 8)</Text>
+          </Box>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Box w="16px" h="16px" bg="red.200" borderRadius="md" border="1px solid" borderColor="gray.300" />
+            <Text fontSize="sm">Rejected (All reviewers scored and average score &lt; 5)</Text>
+          </Box>
+        </Box>
+      </Box>
       {/* Stats Grid */}
       <SimpleGrid columns={{ base: 1, md: 4 }} gap={4} mb={8}>
         {statItems.map((stat, index) => (

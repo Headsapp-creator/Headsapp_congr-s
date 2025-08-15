@@ -99,6 +99,7 @@ export default function Dashboard(props) {
     };
 
     updateActiveRoute();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location, routes]);
 
   const getRoutes = (routes) => {

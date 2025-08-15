@@ -4,8 +4,6 @@ import {
   Button,
   Flex,
   Icon,
-  Image,
-  Link,
   Menu,
   MenuButton,
   MenuItem,
@@ -15,7 +13,6 @@ import {
   useColorMode,
 } from '@chakra-ui/react';
 // Custom Components
-import { ItemContent } from 'components/menu/ItemContent';
 import { SearchBar } from 'components/navbar/searchBar/SearchBar';
 import { SidebarResponsive } from 'components/sidebar/Sidebar';
 import PropTypes from 'prop-types';
@@ -26,6 +23,14 @@ import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { FaEthereum } from 'react-icons/fa';
 import routes from 'routes';
 import { useNavigate } from 'react-router-dom';
+import { io } from "socket.io-client";
+const socket = io("http://localhost:5000", {
+  transports: ["websocket"],
+  withCredentials: true,
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+});
 
 export default function HeaderLinks(props) {
   const { secondary } = props;
@@ -45,6 +50,72 @@ export default function HeaderLinks(props) {
     '14px 17px 40px 4px rgba(112, 144, 176, 0.18)',
     '14px 17px 40px 4px rgba(112, 144, 176, 0.06)',
   );
+
+
+
+  const [notifications, setNotifications] = React.useState([]);
+// eslint-disable-next-line no-unused-vars
+const [hasUnread, setHasUnread] = React.useState(false);
+const unreadCount = notifications.filter(n => !n.isRead).length;
+
+React.useEffect(() => {
+  fetch("http://localhost:5000/communications/admin/notifications")
+    .then(res => res.json())
+    .then(data => {
+      setNotifications(data);
+      setHasUnread(data.some(n => !n.isRead));
+    });
+
+// Listen for real-time notifications
+    socket.on("admin-notification", (notif) => {
+      setNotifications(prev => [{ ...notif, id: Math.random().toString() }, ...prev]);
+      setHasUnread(true);
+    });
+
+    // Cleanup on unmount
+    return () => {
+      socket.off("admin-notification");
+    };
+
+}, []);
+
+const markAllRead = async () => {
+  await fetch("http://localhost:5000/communications/admin/notifications/mark-all-read", { method: "POST" });
+  // Refresh notifications
+  fetch("http://localhost:5000/communications/admin/notifications")
+    .then(res => res.json())
+    .then(data => {
+      setNotifications(data);
+      setHasUnread(false);
+    });
+};
+
+const handleNotificationClick = async (n) => {
+    if (!n.isRead) {
+      await fetch(`http://localhost:5000/communications/admin/notifications/${n.id}/read`, { 
+        method: "POST" 
+      });
+      setNotifications(prev =>
+        prev.map(x => x.id === n.id ? { ...x, isRead: true } : x)
+      );
+    }
+    
+    // Scroll to the referenced document if it exists
+    if (n.documentId) {
+      const element = document.getElementById(n.documentId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Optional: highlight the element temporarily
+        element.style.transition = 'background-color 0.5s';
+        element.style.backgroundColor = colorMode === 'light' ? '#E6FFFA' : '#2C5282';
+        setTimeout(() => {
+          element.style.backgroundColor = '';
+        }, 2000);
+      }
+    }
+  };
+
   return (
     <Flex
       w={{ sm: '100%', md: 'auto' }}
@@ -102,16 +173,39 @@ export default function HeaderLinks(props) {
       </Flex>
       <SidebarResponsive routes={routes} />
       <Menu>
-        <MenuButton p="0px">
-          <Icon
-            mt="6px"
-            as={MdNotificationsNone}
-            color={navbarIcon}
-            w="18px"
-            h="18px"
-            me="10px"
-          />
-        </MenuButton>
+        <MenuButton p="0px" position="relative">
+      <Icon
+        mt="6px"
+        as={MdNotificationsNone}
+        color={navbarIcon}
+        w="18px"
+        h="18px"
+        me="10px"
+      />
+      {unreadCount > 0 && (
+  <span
+    style={{
+      position: "absolute",
+      top: 0,
+      right: 0,
+      minWidth: 18,
+      height: 18,
+      background: "red",
+      borderRadius: "50%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      color: "white",
+      fontSize: 12,
+      fontWeight: "bold",
+      zIndex: 1,
+      padding: "0 5px"
+    }}
+  >
+    {unreadCount}
+  </span>
+)}
+    </MenuButton>
         <MenuList
           boxShadow={shadow}
           p="20px"
@@ -128,32 +222,42 @@ export default function HeaderLinks(props) {
               Notifications
             </Text>
             <Text
-              fontSize="sm"
-              fontWeight="500"
-              color={textColorBrand}
-              ms="auto"
-              cursor="pointer"
-            >
-              Mark all read
-            </Text>
+  fontSize="sm"
+  fontWeight="500"
+  color={textColorBrand}
+  ms="auto"
+  cursor={unreadCount > 0 ? "pointer" : "not-allowed"}
+  opacity={unreadCount > 0 ? 1 : 0.5}
+  onClick={unreadCount > 0 ? markAllRead : undefined}
+>
+  Mark all read
+</Text>
           </Flex>
-          <Flex flexDirection="column">
+          <Flex flexDirection="column" maxHeight="300px" overflowY="auto">
+            {notifications.length === 0 && (
+          <Text color="gray.400" fontSize="sm">No notifications</Text>
+        )}
+        {notifications.map(n => (
             <MenuItem
-              _hover={{ bg: 'none' }}
-              _focus={{ bg: 'none' }}
-              px="0"
-              borderRadius="8px"
-              mb="10px"
-            >
-            </MenuItem>
-            <MenuItem
-              _hover={{ bg: 'none' }}
-              _focus={{ bg: 'none' }}
-              px="0"
-              borderRadius="8px"
-              mb="10px"
-            >
-            </MenuItem>
+      key={n.id}
+      _hover={{ bg: 'none' }}
+      _focus={{ bg: 'none' }}
+      px="0"
+      borderRadius="8px"
+      mb="10px"
+      onClick={() => handleNotificationClick(n)}
+    >
+      <Text
+        fontWeight={n.isRead ? "400" : "700"}
+        color={n.isRead ? "gray.400" : textColor}
+      >
+        {n.message}
+      </Text>
+      <Text fontSize="xs" color="gray.500" ml={2}>
+        {new Date(n.createdAt).toLocaleString()}
+      </Text>
+    </MenuItem>
+            ))}
           </Flex>
         </MenuList>
       </Menu>

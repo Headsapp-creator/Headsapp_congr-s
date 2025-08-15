@@ -47,9 +47,10 @@ export const getEvents = async (req, res) => {
         status: true,
         dateDebut: true,
         capacity: true,
-        pricingSteps: true, 
+        pricingSteps: true,
         selectedAttributes: true,
-        activityOptions: true, 
+        activityOptions: true,
+        image: true,
       },
     });
 
@@ -71,10 +72,11 @@ export const getEvents = async (req, res) => {
           dateDebut: event.dateDebut,
           capacity: event.capacity,
           participantCount,
-          price, 
-          pricingSteps: event.pricingSteps || {}, 
+          price,
+          pricingSteps: event.pricingSteps || {},
           selectedAttributes: event.selectedAttributes || [],
           activityOptions: event.activityOptions || [],
+          image: event.image,
         };
       })
     );

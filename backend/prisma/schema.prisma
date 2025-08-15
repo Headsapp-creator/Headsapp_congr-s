@@ -39,25 +39,21 @@ model User {
   role            UserRole  @default(PARTICIPANT)
   dateInscription DateTime? @default(now())
 
-  // Admin-specific fields
   privileges String[]
 
-  // Participant-specific fields
   statutInscription String? @default("PENDING")
 
-  // Speaker-specific fields
   biographie String?
   specialite String?
   experience Int?    @default(0)
 
-  // Fields for email verification and password reset
   isVerified                 Boolean                @default(false)
   verificationToken          Int?
   verificationTokenExpiresAt DateTime?              @default(now())
   resetPasswordToken         Int?
   resetPasswordExpiresAt     DateTime?
   lastLogin                  DateTime?
-  // Relations
+
   documents                  Document[]
   sessions                   Session[]
   comites                    ComiteMember[]
@@ -65,10 +61,12 @@ model User {
   attestations               Attestation[]
   communications             Communication[]
   ParticipantProgramme       ParticipantProgramme[]
-  ReviewerAssignment         ReviewerAssignment[]
-  
-  createdAt                  DateTime               @default(now())
-  updatedAt                  DateTime               @updatedAt
+  notifications              Notification[]         @relation("UserNotifications")
+  reviewerNotifications      Notification[]         @relation("ReviewerNotifications")
+
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  ReviewerAssignment ReviewerAssignment[]
 }
 
 model Badge {
@@ -78,7 +76,6 @@ model Badge {
   imageUrl        String?
   dateAttribution DateTime @default(now())
 
-  // Relations
   utilisateur   User   @relation(fields: [utilisateurId], references: [id])
   utilisateurId String @db.ObjectId
   event         Event  @relation(fields: [eventId], references: [id])
@@ -95,10 +92,7 @@ model Attestation {
   nom          String
   description  String
   dateEmission DateTime @default(now())
-  //background(image / logo)
-  //signature electronique
 
-  // Relations
   utilisateur   User   @relation(fields: [utilisateurId], references: [id])
   utilisateurId String @db.ObjectId
 
@@ -118,14 +112,14 @@ model Event {
   selectedAttributes Json?
   pricingSteps       Json?
   activityOptions    Json?
-  // Relations
+
   programmes         Programme[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   Badge Badge[]
-
+  Communication Communication[]
   ParticipantProgramme ParticipantProgramme[]
 }
 
@@ -136,12 +130,9 @@ model Programme {
   capacity    Int?
   price       Float?
 
-  // Relations
   event    Event     @relation(fields: [eventId], references: [id])
   eventId  String    @db.ObjectId
   sessions Session[]
-  //location   Localisation @relation(fields: [locationId], references: [id])
-  //locationId String       @db.ObjectId
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -153,12 +144,11 @@ model ParticipantProgramme {
   eventId             String   @db.ObjectId
   programmeIds        String[]
   formData            Json?
-  takeoverDocumentUrl String? // <-- Add this line
+  takeoverDocumentUrl String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   checkedIn           Boolean  @default(false)
 
-  // Relations
   event       Event @relation(fields: [eventId], references: [id])
   participant User  @relation(fields: [participantId], references: [id])
 
@@ -172,7 +162,6 @@ model Session {
   heureDebut  DateTime
   heureFin    DateTime
 
-  // Relations
   programme   Programme @relation(fields: [programmeId], references: [id])
   programmeId String    @db.ObjectId
   speaker     User      @relation(fields: [speakerId], references: [id])
@@ -196,7 +185,6 @@ model Comite {
   id  String @id @default(auto()) @map("_id") @db.ObjectId
   nom String
 
-  // Relations
   membres   ComiteMember[]
   documents Document[]
 
@@ -223,7 +211,6 @@ model Document {
   dateSoumission DateTime       @default(now())
   statut         DocumentStatus @default(PENDING)
 
-  // Relations
   soumisPar   User    @relation(fields: [soumisParId], references: [id])
   soumisParId String  @db.ObjectId
   comite      Comite? @relation(fields: [comiteId], references: [id])
@@ -235,18 +222,21 @@ model Document {
 
 model Communication {
   id                  String               @id @default(auto()) @map("_id") @db.ObjectId
-  theme               String
+  typeOfAbstract      String
   speciality          String
   title               String
   mainAuthor          String
-  coAuthors           String
+  coAuthors           String[]
   email               String
   phone               String?
   service             String
   institution         String?
-  objectives          String
-  methods             String
-  results             String
+  pays                String?
+  ville               String?
+  introduction          String
+  methods             String?
+  casePresentation    String?
+  results             String?
   filePath            String
   conclusion          String
   status              String               @default("pending")
@@ -254,9 +244,13 @@ model Communication {
   updatedAt           DateTime             @updatedAt
   userId              String               @db.ObjectId
   user                User                 @relation(fields: [userId], references: [id])
+  eventId             String?              @db.ObjectId
+  event               Event?               @relation(fields: [eventId], references: [id])
   committee           String?
   feedback            String?
-  reviewerAssignments ReviewerAssignment[] // <-- Add this line
+  reviewerAssignments ReviewerAssignment[]
+
+  Notification Notification[]
 }
 
 model ReviewerAssignment {
@@ -265,8 +259,38 @@ model ReviewerAssignment {
   communicationId String        @db.ObjectId
   reviewer        User          @relation(fields: [reviewerId], references: [id])
   reviewerId      String        @db.ObjectId
-  score           Float? 
+  score           Float?
+
+  tracking        Tracking?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Tracking {
+  id           String             @id @default(auto()) @map("_id") @db.ObjectId
+  assignment   ReviewerAssignment @relation(fields: [assignmentId], references: [id])
+  assignmentId String             @unique @db.ObjectId
+  viewed       Boolean            @default(false)
+  viewedAt     DateTime?
+  downloaded   Boolean            @default(false)
+  downloadedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  type       String
+  message    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  reviewerId String   @db.ObjectId
+  reviewer   User     @relation("ReviewerNotifications", fields: [reviewerId], references: [id])
+  userId     String?  @db.ObjectId
+  user       User?    @relation("UserNotifications", fields: [userId], references: [id])
+
+  communicationId String?        @unique @db.ObjectId
+  communication   Communication? @relation(fields: [communicationId], references: [id])
 }

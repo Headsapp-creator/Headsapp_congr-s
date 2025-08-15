@@ -1,45 +1,46 @@
+@use 'sass:color';
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-$primary-color: #3182ce;
-$primary-hover: #2b6cb0;
-$text-color: #2d3748;
-$light-text: #718096;
-$border-color: #e2e8f0;
-$background-light: #f7fafc;
+$primary-color: #4361ee;
+$primary-hover: #3a56d4;
+$secondary-color: #6c757d;
+$text-color: #212529;
+$light-text: #6c757d;
+$border-color: #dee2e6;
+$background-light: #f8f9fa;
 $background-white: #ffffff;
-$success-color: #38a169;
-$warning-color: #dd6b20;
+$success-color: #28a745;
+$warning-color: #ffc107;
+$error-color: #dc3545;
+$card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+$modal-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 
 .reviewer-dashboard {
   font-family: 'Inter', sans-serif;
   color: $text-color;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px;
-  padding-top: 130px;
+  padding-top: 100px;
   min-height: 100vh;
-}
-
-.dashboard-header {
-  padding: 24px 0;
-  border-bottom: 1px solid $border-color;
-  margin-bottom: 24px;
-
-  .dashboard-title {
-    font-size: 24px;
-    font-weight: 600;
-    margin: 0;
-  }
+  position: relative;
+  z-index: 1;
+  overflow: visible;
 }
 
 .dashboard-container {
   display: flex;
   gap: 32px;
+  margin-top: 30px;
 }
 
 .dashboard-nav {
-  width: 220px;
+  width: 250px;
   flex-shrink: 0;
+  background: $background-white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: $card-shadow;
 
   .nav-list {
     list-style: none;
@@ -47,15 +48,19 @@ $warning-color: #dd6b20;
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
   }
 
   .nav-item {
-    padding: 12px 16px;
-    border-radius: 6px;
+    padding: 15px 20px;
+    border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: $text-color;
 
     &:hover {
       background-color: rgba($primary-color, 0.1);
@@ -63,8 +68,8 @@ $warning-color: #dd6b20;
     }
 
     &.active {
-      background-color: rgba($primary-color, 0.1);
-      color: $primary-color;
+      background-color: $primary-color;
+      color: white;
       font-weight: 600;
     }
   }
@@ -72,6 +77,8 @@ $warning-color: #dd6b20;
 
 .dashboard-content {
   flex-grow: 1;
+  position: relative;
+  z-index: 1;
 }
 
 .error-message {
@@ -86,62 +93,328 @@ $warning-color: #dd6b20;
 .abstracts-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
 }
 
 .abstract-card {
   background-color: $background-white;
-  border-radius: 8px;
-  padding: 20px;
+  border-radius: 12px;
+  padding: 25px;
   border: 1px solid $border-color;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  justify-content: center;
+  transition: all 0.3s ease;
   position: relative;
-  height: 100%;
-  align-items: flex-start;
+  min-height: 180px;
+  overflow: visible;
+  box-shadow: $card-shadow;
 
   &:hover {
     border-color: $primary-color;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   }
 
   &.rated {
-    border-left: 4px solid $success-color;
+    border-left: 5px solid $success-color;
   }
 
   &.pending {
-    border-left: 4px solid $warning-color;
+    border-left: 5px solid $warning-color;
+  }
+
+  .abstract-card-click-target {
+    cursor: pointer;
+    height: 100%;
+    padding-right: 150px;
+  }
+
+  .abstract-card-content {
+    margin-bottom: 15px;
+    pointer-events: none;
   }
 
   .abstract-card-title {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
-    margin: 0 0 8px 0;
+    margin: 0 0 10px 0;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    pointer-events: none;
+    color: $text-color;
 
     .rated-badge {
       font-size: 12px;
-      background-color: rgba($success-color, 0.1);
+      background-color: rgba($success-color, 0.15);
       color: $success-color;
-      padding: 2px 8px;
-      border-radius: 4px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .pending-badge {
+      font-size: 12px;
+      background-color: rgba($warning-color, 0.15);
+      color: #c08410;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
     }
   }
 
   .abstract-card-authors {
-    font-size: 14px;
+    font-size: 16px;
     color: $light-text;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    pointer-events: none;
   }
 
   .abstract-card-score {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
     color: $success-color;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    &.pending-score {
+      color: #c08410;
+      font-weight: 600;
+    }
+    
+    .score-stars {
+      display: inline-flex;
+      gap: 2px;
+      margin-left: 8px;
+      
+      .star {
+        color: #cbd5e0;
+        font-size: 14px;
+        
+        &.filled {
+          color: #ffd700;
+        }
+      }
+    }
+  }
+
+  .abstract-card-actions {
+    position: absolute;
+    right: 25px;
+    top: 25px;
+    display: flex;
+    gap: 10px;
+    pointer-events: auto;
+
+    .action-btn {
+      padding: 8px 15px;
+      border-radius: 8px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      pointer-events: auto;
+      border: none;
+      font-size: 14px;
+
+      &.edit-btn {
+        background-color: #6f42c1;
+        color: white;
+
+        &:hover {
+          background-color: #5a32a3;
+        }
+      }
+
+      &.view-btn {
+        background-color: $primary-color;
+        color: white;
+
+        &:hover {
+          background-color: $primary-hover;
+        }
+      }
+
+      &.download-btn {
+        background-color: $success-color;
+        color: white;
+
+        &:hover {
+          background-color: color.adjust($success-color, $lightness: -10%);
+        }
+      }
+    }
+  }
+}
+
+.edit-btn {
+  background-color: #4299e1 !important;
+  color: white !important;
+  border: none !important;
+
+  &:hover {
+    background-color: #2b6cb0 !important;
+  }
+}
+
+.form-group {
+  margin-bottom: 25px !important;
+
+  label {
+    display: block !important;
+    margin-bottom: 10px !important;
+    font-weight: 600 !important;
+    font-size: 16px;
+    color: $text-color;
+  }
+
+  .chakra-input,
+  .chakra-textarea {
+    width: 100% !important;
+    padding: 14px !important;
+    border: 2px solid $border-color !important;
+    border-radius: 8px !important;
+    font-size: 16px !important;
+    font-family: 'Inter', sans-serif !important;
+    transition: all 0.3s ease;
+
+    &:focus {
+      outline: none !important;
+      border-color: $primary-color !important;
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2) !important;
+    }
+    
+    &:disabled {
+      background-color: #f8f9fa;
+      cursor: not-allowed;
+    }
+  }
+
+  .chakra-textarea {
+    min-height: 120px !important;
+    resize: vertical !important;
+  }
+  
+  &.disabled {
+    opacity: 0.7;
+    
+    label {
+      color: $light-text;
+    }
+  }
+}
+
+.modal-actions {
+  display: flex !important;
+  gap: 15px !important;
+  justify-content: center !important;
+  margin-top: 30px !important;
+  padding-top: 20px !important;
+  border-top: 1px solid $border-color;
+
+  .cancel-button,
+  .submit-button {
+    padding: 12px 30px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+    font-size: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .cancel-button {
+    background-color: #e9ecef !important;
+    color: $text-color !important;
+
+    &:hover {
+      background-color: #dee2e6 !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .submit-button {
+    background-color: $primary-color !important;
+    color: white !important;
+
+    &:hover {
+      background-color: $primary-hover !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+.edit-form-section {
+  margin-bottom: 30px;
+  padding: 25px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  
+  h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: $text-color;
+    font-size: 22px;
+    font-weight: 600;
+    text-align: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #dee2e6;
+  }
+}
+
+.form-group {
+  margin-bottom: 25px !important;
+
+  label {
+    display: block !important;
+    margin-bottom: 10px !important;
+    font-weight: 600 !important;
+    font-size: 16px;
+    color: $text-color;
+  }
+
+  .chakra-input,
+  .chakra-textarea {
+    width: 100% !important;
+    padding: 14px !important;
+    border: 2px solid $border-color !important;
+    border-radius: 8px !important;
+    font-size: 16px !important;
+    font-family: 'Inter', sans-serif !important;
+    transition: all 0.3s ease;
+    background-color: white;
+
+    &:focus {
+      outline: none !important;
+      border-color: $primary-color !important;
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2) !important;
+    }
+    
+    &:disabled {
+      background-color: #f8f9fa;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+  }
+
+  .chakra-textarea {
+    min-height: 120px !important;
+    resize: vertical !important;
+  }
+  
+  &.disabled {
+    opacity: 0.7;
+    
+    label {
+      color: $light-text;
+    }
   }
 }
 
@@ -152,129 +425,222 @@ $warning-color: #dd6b20;
   font-size: 16px;
 }
 
-/* Modal Styles */
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  position: fixed !important;
+  padding-top: 80px;
+  top: 300 !important;
+  left: 0 !important;
+  right: 0 !important;
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  z-index: 10000 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto;
+  backdrop-filter: blur(5px);
 }
 
 .abstract-modal {
-  background-color: $background-white;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  animation: modalFadeIn 0.3s ease-out;
+  background-color: $background-white !important;
+  border-radius: 16px !important;
+  width: 95% !important;
+  max-width: 900px !important;
+  max-height: 80vh !important;
+  overflow-y: auto !important;
+  box-shadow: $modal-shadow !important;
+  animation: modalFadeIn 0.4s ease-out !important;
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: relative !important;
+  z-index: 10001 !important;
+  pointer-events: auto;
+  margin: 60px auto !important;
 
-  .modal-header {
-    padding: 20px;
-    border-bottom: 1px solid $border-color;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    h2 {
-      margin: 0;
-      font-size: 20px;
-    }
-
-    .close-button {
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      color: $light-text;
-      padding: 0 8px;
-
-      &:hover {
-        color: $text-color;
-      }
-    }
+  // Ensure all child elements can receive pointer events
+  * {
+    pointer-events: auto;
   }
 
-  .modal-body {
-    padding: 20px;
+  // Disable pointer events for backdrop elements
+  &::before,
+  &::after {
+    pointer-events: none;
+  }
+}
 
-    .abstract-authors {
-      font-size: 16px;
-      margin-bottom: 20px;
-      color: $light-text;
+
+
+.modal-header {
+  padding: 25px !important;
+  border-bottom: 1px solid $border-color !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  background-color: #f8f9fa;
+  border-radius: 16px 16px 0 0;
+
+  h2 {
+    margin: 0 !important;
+    font-size: 26px !important;
+    font-weight: 700 !important;
+    color: $text-color;
+    text-align: center;
+    flex-grow: 1;
+  }
+
+  .close-button {
+    background: none !important;
+    border: none !important;
+    font-size: 28px !important;
+    cursor: pointer !important;
+    color: $light-text !important;
+    padding: 0 10px !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      color: $text-color !important;
+      background-color: rgba(0, 0, 0, 0.05) !important;
+    }
+  }
+}
+
+.modal-body {
+  padding: 25px !important;
+
+  .abstract-authors {
+    font-size: 18px !important;
+    margin-bottom: 25px !important;
+    color: $light-text !important;
+    font-weight: 500;
+  }
+
+  .score-section {
+    margin-top: 35px !important;
+    padding-top: 25px !important;
+    border-top: 1px solid $border-color !important;
+
+    label {
+      display: block !important;
+      margin-bottom: 12px !important;
+      font-weight: 600 !important;
+      font-size: 18px;
+      color: $text-color;
     }
 
-    .abstract-actions {
-      margin-bottom: 30px;
-    }
+    .score-stars-preview {
+      display: flex !important;
+      gap: 8px !important;
+      margin-bottom: 20px !important;
+      justify-content: center !important;
 
-    .view-abstract-button {
-      display: inline-block;
-      padding: 10px 16px;
-      background-color: $primary-color;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
-      font-weight: 500;
-      transition: background-color 0.2s;
+      .star {
+        color: #e2e8f0 !important;
+        font-size: 36px !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        font-family: Arial, sans-serif !important;
 
-      &:hover {
-        background-color: $primary-hover;
-      }
-    }
-
-    .score-section {
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid $border-color;
-
-      label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 500;
-      }
-
-      input {
-        padding: 10px 12px;
-        border: 1px solid $border-color;
-        border-radius: 6px;
-        font-size: 16px;
-        width: 80px;
-        margin-right: 12px;
-      }
-
-      .submit-score-button {
-        padding: 10px 16px;
-        background-color: $success-color;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.2s;
-
-        &:hover:not(:disabled) {
-          background-color: darken($success-color, 10%);
+        &.filled {
+          color: #ffd700 !important;
         }
 
-        &:disabled {
-          background-color: lighten($success-color, 20%);
-          cursor: not-allowed;
+        &:hover {
+          color: #ffd700 !important;
+          transform: scale(1.2);
         }
       }
+    }
 
-      .score-notice {
-        color: $success-color;
-        font-weight: 500;
-        margin-top: 8px;
+    .score-display {
+      text-align: center !important;
+      font-size: 20px !important;
+      font-weight: 600 !important;
+      color: #4a5568 !important;
+      margin-bottom: 15px !important;
+      
+      .score-value {
+        font-size: 24px !important;
+        color: #2d3748 !important;
       }
+    }
+
+    input {
+      padding: 12px 15px !important;
+      border: 2px solid $border-color !important;
+      border-radius: 8px !important;
+      font-size: 18px !important;
+      width: 100px !important;
+      margin-right: 15px !important;
+      text-align: center !important;
+      transition: border-color 0.3s ease !important;
+
+      &:focus {
+        border-color: #4299e1 !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2) !important;
+      }
+
+      &:focus {
+        border-color: $primary-color !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+      }
+    }
+
+    .submit-score-button {
+      padding: 12px 25px !important;
+      background-color: #4361ee !important;
+      color: white !important;
+      border: none !important;
+      border-radius: 8px !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      transition: all 0.3s ease !important;
+      display: block !important;
+      margin: 20px auto 0 !important;
+      font-size: 16px !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+
+      &:hover:not(:disabled) {
+        background-color: #3a56d4 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+      }
+
+      &:disabled {
+        background-color: #a0aec0 !important;
+        cursor: not-allowed !important;
+        transform: none !important;
+        box-shadow: none !important;
+      }
+    }
+
+    .score-notice {
+      color: #28a745 !important;
+      font-weight: 600 !important;
+      margin-top: 20px !important;
+      font-size: 18px !important;
+      padding: 12px 20px !important;
+      background-color: rgba(40, 167, 69, 0.1) !important;
+      border-radius: 8px !important;
+      text-align: center !important;
+      border: 1px solid rgba(40, 167, 69, 0.3) !important;
+    }
+    
+    .score-range-info {
+      text-align: center !important;
+      font-size: 14px !important;
+      color: #718096 !important;
+      margin-top: 8px !important;
     }
   }
 }
@@ -291,132 +657,41 @@ $warning-color: #dd6b20;
   }
 }
 
-// Add or update in ReviewerDashboard.scss
+.score-stars {
+  display: inline-block !important;
+  margin: 0 8px !important;
 
-.rated-badge {
-  background: #bee3f8;
-  color: #2b6cb0;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: 8px;
-  padding: 2px 10px;
-  margin-left: 10px;
-}
+  .star {
+    color: #cbd5e0 !important;
+    font-size: 16px !important;
+    font-family: Arial, sans-serif !important;
 
-.pending-badge {
-  background: #fffaf0;
-  color: #dd6b20;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: 8px;
-  padding: 2px 10px;
-  margin-left: 10px;
-}
-
-.abstract-card-score.pending-score {
-  color: #dd6b20;
-  font-weight: 600;
+    &.filled {
+      color: #ffd700 !important;
+    }
+  }
 }
 
 .nav-icon {
-  display: inline-flex;
-  vertical-align: middle;
-  margin-right: 8px;
+  display: inline-flex !important;
+  vertical-align: middle !important;
+  margin-right: 8px !important;
 }
 
-.abstract-card-discipline {
-  font-size: 14px;
-  color: $light-text;
-  margin-bottom: 8px;
-  font-style: italic;
-}
 
-.score-stars {
-  display: inline-block;
-  margin: 0 8px;
-
-  .star {
-    color: #cbd5e0;
-    font-size: 16px;
-
-    &.filled {
-      color: $success-color;
-    }
-  }
-}
-
-// Update the existing score styles
-.abstract-card-score {
-  font-size: 14px;
-  font-weight: 500;
-  color: $success-color;
-
-  &.pending-score {
-    color: $warning-color;
-    font-weight: 600;
-  }
-}
-
-.score-stars-preview {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 12px;
-
-  .star {
-    color: #cbd5e0;
-    font-size: 24px;
-    cursor: pointer;
-    transition: color 0.2s;
-
-    &.filled {
-      color: $success-color;
-    }
-
-    &:hover {
-      color: $success-color;
-    }
-  }
-}
-
-.abstract-card-content {
-  flex: 1 1 auto;
-  padding-right: 16px;
-}
-
-.abstract-card-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-  padding-top: 16px;
-}
-
-.read-more-button {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background-color: $primary-color;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 14px;
-  font-weight: 500;
+// Ensure all interactive elements are clickable
+.score-stars-preview .star,
+#score-input,
+.submit-score-button {
+  pointer-events: auto !important;
   cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: $primary-hover;
-  }
-
-  .eye-icon {
-    font-size: 16px;
-  }
 }
 
-.abstract-card-score-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 8px;
+// Fix for input field
+input[type="number"] {
+  pointer-events: auto;
+
+  &:disabled {
+    pointer-events: none;
+  }
 }

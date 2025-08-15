@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import {
+  COMMUNICATION_APPROVAL_TEMPLATE,
+  COMMUNICATION_REJECTION_TEMPLATE,
   PASSWORD_RESET_REQUEST_TEMPLATE,
   PASSWORD_RESET_SUCCESS_TEMPLATE,
   VERIFICATION_EMAIL_TEMPLATE,
@@ -103,5 +105,49 @@ export const sendResetSuccessEmail = async (email) => {
   } catch (error) {
     console.error(`Error sending password reset success email`, error);
     throw new Error(`Error sending password reset success email: ${error}`);
+  }
+};
+
+export const sendCommunicationRejectionEmail = async (email, name, title, score) => {
+  const html = COMMUNICATION_REJECTION_TEMPLATE
+    .replace("{name}", name)
+    .replace("{title}", title)
+    .replace("{score}", score);
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "Your Abstract Has Not Been Approved",
+    html,
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Communication rejection email sent successfully", info.response);
+  } catch (error) {
+    console.error(`Error sending communication rejection email`, error);
+    throw new Error(`Error sending communication rejection email: ${error}`);
+  }
+};
+
+export const sendCommunicationApprovalEmail = async (email, name, title, score) => {
+  const html = COMMUNICATION_APPROVAL_TEMPLATE
+    .replace("{name}", name)
+    .replace("{title}", title)
+    .replace("{score}", score);
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "Your Abstract Has Been Approved!",
+    html,
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Communication approval email sent successfully", info.response);
+  } catch (error) {
+    console.error(`Error sending communication approval email`, error);
+    throw new Error(`Error sending communication approval email: ${error}`);
   }
 };

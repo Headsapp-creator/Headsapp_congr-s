@@ -165,3 +165,68 @@ export const WELCOME_EMAIL_WITH_CREDENTIALS_TEMPLATE = `
 </html>
 `;
 
+
+export const COMMUNICATION_APPROVAL_TEMPLATE = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Abstract Approved</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(to right, #4CAF50, #45a049); padding: 20px; text-align: center;">
+    <h1 style="color: white; margin: 0;">Abstract Approved!</h1>
+  </div>
+  <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 5px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+    <p>Hello {name},</p>
+    <p>Congratulations! Your abstract titled "<strong>{title}</strong>" has been approved.</p>
+    <div style="text-align: center; margin: 30px 0;">
+      <div style="background-color: #4CAF50; color: white; width: 50px; height: 50px; line-height: 50px; border-radius: 50%; display: inline-block; font-size: 30px;">
+        ✓
+      </div>
+    </div>
+    <p>Your abstract has received an average score of <strong>{score}/10</strong> from our review committee, which exceeds our threshold for approval.</p>
+    <p>We're excited to include your work in our upcoming event. You will receive further information about next steps soon.</p>
+    <p>If you have any questions, please don't hesitate to contact us.</p>
+    <p>Best regards,<br>Your App Team</p>
+  </div>
+  <div style="text-align: center; margin-top: 20px; color: #888; font-size: 0.8em;">
+    <p>This is an automated message, please do not reply to this email.</p>
+  </div>
+</body>
+</html>
+`;
+
+export const COMMUNICATION_REJECTION_TEMPLATE = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Abstract Not Approved</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+ <div style="background: linear-gradient(to right, #f44336, #d32f2f); padding: 20px; text-align: center;">
+   <h1 style="color: white; margin: 0;">Abstract Not Approved</h1>
+ </div>
+ <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 5px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+   <p>Hello {name},</p>
+   <p>We regret to inform you that your abstract titled "<strong>{title}</strong>" has not been approved for our upcoming event.</p>
+   <div style="text-align: center; margin: 30px 0;">
+     <div style="background-color: #f44336; color: white; width: 50px; height: 50px; line-height: 50px; border-radius: 50%; display: inline-block; font-size: 30px;">
+       ✗
+     </div>
+   </div>
+   <p>Your abstract received an average score of <strong>{score}/10</strong> from our review committee, which does not meet our threshold for approval.</p>
+   <p>We encourage you to consider submitting an improved version of your abstract for future events. If you have any questions or would like feedback on your submission, please don't hesitate to contact us.</p>
+   <p>Thank you for your interest in our event.</p>
+   <p>Best regards,<br>Your App Team</p>
+ </div>
+ <div style="text-align: center; margin-top: 20px; color: #888; font-size: 0.8em;">
+   <p>This is an automated message, please do not reply to this email.</p>
+ </div>
+</body>
+</html>
+`;
+

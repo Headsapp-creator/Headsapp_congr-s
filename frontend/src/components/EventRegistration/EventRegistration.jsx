@@ -49,7 +49,6 @@ function getCurrentPriceStep(pricingSteps, specialty) {
   return steps[steps.length - 1];
 }
 
-// Helper: should this attribute be shown?
 function shouldShow(attr, formData) {
   if (!attr.condition) return true;
   if (Array.isArray(attr.condition.value)) {
@@ -183,10 +182,6 @@ const EventRegistration = () => {
       alert("Please fill all required fields.");
       return;
     }
-    // Join first_name and last_name into name
-    //const fullName = [formData.first_name, formData.last_name].filter(Boolean).join(" ");
-    //const formDataWithName = { ...formData, name: fullName };
-
     // Prepare programmeIds from selected workshops
     const programmeIds = (event.programmes || [])
       .filter(w =>
