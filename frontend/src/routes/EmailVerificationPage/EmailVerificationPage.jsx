@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import "./EmailVerificationPage.scss"
+import api from "../../lib/api";
 
 const EmailVerificationPage = () => {
 	const [code, setCode] = useState(["", "", "", "", "", ""]);
@@ -60,7 +61,7 @@ const EmailVerificationPage = () => {
 			setIsLoading(true);
 			setError(null);
 
-			const response = await fetch("http://localhost:5000/auth/verify-email", {
+			const response = await fetch(api.auth.verifyEmail(), {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ code: verificationCode }),

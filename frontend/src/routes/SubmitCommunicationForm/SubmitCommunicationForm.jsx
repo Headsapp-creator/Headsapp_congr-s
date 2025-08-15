@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./SubmitCommunicationForm.scss";
 import { FiPlus } from "react-icons/fi";
+import api from "../../lib/api";
 
 const specialities = [
     "General Surgery",
@@ -58,7 +59,7 @@ const SubmitCommunicationForm = () => {
         conclusion: "",
         // file: null
     });
-    
+
     // Refs for auto-focus
     const methodsRef = useRef(null);
     const casePresentationRef = useRef(null);
@@ -85,7 +86,7 @@ const SubmitCommunicationForm = () => {
 
     const handleChange = e => {
         const { name, value } = e.target;
-        
+
         // Check if this is one of the communication content fields
         if (['introduction', 'methods', 'casePresentation', 'results', 'conclusion'].includes(name)) {
             // Check if we're at the word limit
@@ -157,7 +158,7 @@ const SubmitCommunicationForm = () => {
                 formDataToSend.append("eventId", eventId);
             }
 
-            const response = await fetch("http://localhost:5000/communications/submit", {
+            const response = await fetch(api.communications.submit(), {
                 method: "POST",
                 credentials: "include",
                 body: formDataToSend,
@@ -349,7 +350,7 @@ const SubmitCommunicationForm = () => {
                             </div>
                         </div>
                     </div>
-                    
+
                     {/* Communication Type Selection */}
                     <div className="communication-type-selection">
                         <div className="input-container">
@@ -383,7 +384,7 @@ const SubmitCommunicationForm = () => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className={`input-wrapper ${formData.communicationType === "case-presentation" ? "selected" : ""}`}>
                                 <div className="radio-label-container">
                                     <input
@@ -416,7 +417,7 @@ const SubmitCommunicationForm = () => {
                             </div>
                         </div>
                     </div>
-                    
+
                     {/* Results Input - Always visible but optional for Case Presentation */}
                     <div className="form-group">
                         <label htmlFor="results">Results {formData.communicationType === "case-presentation" ? "" : <span className="required">*</span>}</label>
@@ -435,7 +436,7 @@ const SubmitCommunicationForm = () => {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="form-group">
                         <label htmlFor="conclusion">Conclusion<span className="required">*</span></label>
                         <div className="textarea-container">

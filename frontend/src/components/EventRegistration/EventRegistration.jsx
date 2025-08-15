@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import "./EventRegistration.scss";
 import { AuthContext } from "../../context/AuthContext.jsx";
 import { useContext } from "react";
+import api from "../../lib/api";
 
 const ATTRIBUTE_ORDER = [
   "name",
@@ -72,7 +73,7 @@ const EventRegistration = () => {
   const { currentUser } = useContext(AuthContext) || {};
 
   useEffect(() => {
-    fetch(`http://localhost:5000/events/${id}`)
+    fetch(api.events.detail(id))
       .then((res) => res.json())
       .then((data) => {
         setEvent(data);
@@ -198,13 +199,13 @@ const EventRegistration = () => {
         fd.append("formData", JSON.stringify(formData));
         fd.append("takeoverDocument", takeoverFile);
 
-        response = await fetch(`http://localhost:5000/events/${event.id}/subscribe`, {
+        response = await fetch(api.events.subscribe(event.id), {
           method: "POST",
           body: fd,
           credentials: "include",
         });
       } else {
-        response = await fetch(`http://localhost:5000/events/${event.id}/subscribe`, {
+        response = await fetch(api.events.subscribe(event.id), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

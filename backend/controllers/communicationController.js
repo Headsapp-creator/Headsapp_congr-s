@@ -21,10 +21,7 @@ export const submitCommunication = async (req, res) => {
       typeOfAbstract, speciality, title, mainAuthor, coAuthors, email, phone,
       service, institution, pays, ville, introduction, methods, casePresentation, results, conclusion, eventId, communicationType
     } = req.body;
-    console.log("Received request:", req.body, req.files);
 
-    // Generate Word file from communication content with proper styling
-    // Filter out empty sections for Word document generation
     const hasIntroduction = introduction && typeof introduction === 'string' && introduction.trim() !== '';
     const hasMethods = communicationType === 'methods' && methods && typeof methods === 'string' && methods.trim() !== '';
     const hasCasePresentation = communicationType === 'case-presentation' && casePresentation && typeof casePresentation === 'string' && casePresentation.trim() !== '';
@@ -258,8 +255,7 @@ documentContent += `
     // Validate the generated Word document
     try {
       const validationZip = new PizZip(docBuffer);
-      // If we can create a zip from the buffer, it's likely valid
-      console.log("Generated Word document is valid");
+      
     } catch (validationError) {
       console.error("Generated Word document is invalid:", validationError);
       throw new Error("Failed to generate valid Word document");
@@ -279,7 +275,6 @@ documentContent += `
     if (req.user && req.user.id) {
       // If user is logged in, use their account
       user = await prisma.user.findUnique({ where: { id: req.user.id } });
-      console.log("Authenticated user:", user);
     } else {
       // If not logged in, check if user exists by email
       user = await prisma.user.findUnique({ where: { email } });
@@ -289,7 +284,6 @@ documentContent += `
         const hashedPassword = await bcrypt.hash(randomPassword, 10);
         const [prenom, ...restNom] = mainAuthor.trim().split(" ");
         const nom = restNom.join(" ") || prenom;
-        console.log("Creating new user:", nom, prenom, email);
 
         user = await prisma.user.create({
           data: {
@@ -299,34 +293,24 @@ documentContent += `
             password: hashedPassword,
           },
         });
-        console.log("User created:", user);
 
-        // Send credentials by email
         await sendWelcomeEmail2(email, mainAuthor, randomPassword);
       }
-      // If user already exists by email, use that user
-      // user is already set above
+      
     }
 
-    // --- Upload generated Word file to Cloudinary ---
-    console.log("Uploading generated Word file to Cloudinary...");
-
-    // Upload to Cloudinary
+  
     let cloudinaryResult;
     try {
       cloudinaryResult = await uploadToCloudinary(tempFilePath);
-      console.log("Cloudinary result:", cloudinaryResult);
     } catch (uploadError) {
       console.error("Cloudinary upload error:", uploadError);
       throw new Error(`Failed to upload to Cloudinary: ${uploadError.message}`);
     }
 
-    // Remove temp file
     fs.unlinkSync(tempFilePath);
-    console.log("Saving communication to DB...");
 
-    // Save to database
-    // Process coAuthors - convert from comma-separated string to array if needed
+    
     let coAuthorsArray = coAuthors;
     if (typeof coAuthors === 'string') {
       coAuthorsArray = coAuthors.split(',').map(author => author.trim()).filter(author => author.length > 0);
@@ -717,14 +701,12 @@ export const setScore = async (req, res) => {
     const { assignmentId } = req.params;
     const { score } = req.body;
 
-    // Update the score for the assignment
     const assignment = await prisma.reviewerAssignment.update({
       where: { id: assignmentId },
       data: { score: Number(score) },
       include: { communication: true }
     });
 
-    // Get all reviewer assignments for this communication
     const allAssignments = await prisma.reviewerAssignment.findMany({
       where: { communicationId: assignment.communicationId },
       include: {
@@ -737,46 +719,26 @@ export const setScore = async (req, res) => {
       }
     });
 
-    // Calculate the new average score for the communication
-    // Only consider scores that have been set (are numbers)
+   
     const scores = allAssignments
       .map(a => a.score)
       .filter(s => typeof s === "number");
       
     const avg = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : null;
     
-    // Check if all reviewers have set their scores
     const allReviewersScored = allAssignments.every(a => a.score !== null);
-    
-    // Log information for debugging
-    console.log(`Score update for communication ${assignment.communicationId}`);
-    console.log(`Total reviewers assigned: ${allAssignments.length}`);
-    console.log(`Reviewers who have scored: ${scores.length}`);
-    console.log(`All reviewers have scored: ${allReviewersScored}`);
-    console.log(`Individual scores: [${allAssignments.map(a =>
-      `${a.reviewer.prenom} ${a.reviewer.nom}: ${a.score !== null ? a.score : 'not scored'}`
-    ).join(', ')}]`);
-    console.log(`Calculated average: ${avg}`);
 
-    // If all reviewers have scored, send notification to the user based on the average score
     if (allReviewersScored && avg !== null) {
-      console.log(`Communication evaluation completed with average score ${avg.toFixed(2)}`);
       
-      // Get user details to send email
       const user = await prisma.user.findUnique({
         where: { id: assignment.communication.userId },
         select: { email: true, nom: true, prenom: true }
       });
 
-      // Send approval email if avg >= 8
-      if (avg >= 8) {
-        console.log(`Communication approved with average score ${avg.toFixed(2)}`);
-        
-        // Send approval email
+      if (avg >= 8) {        
         if (user) {
           const userName = `${user.prenom} ${user.nom}`;
           await sendCommunicationApprovalEmail(user.email, userName, assignment.communication.title, avg.toFixed(2));
-          console.log(`Approval email sent to ${user.email}`);
         }
 
         // Save notification in DB (optional)
@@ -803,13 +765,11 @@ export const setScore = async (req, res) => {
       }
       // Send rejection email if avg < 8
       else {
-        console.log(`Communication rejected with average score ${avg.toFixed(2)}`);
         
         // Send rejection email
         if (user) {
           const userName = `${user.prenom} ${user.nom}`;
           await sendCommunicationRejectionEmail(user.email, userName, assignment.communication.title, avg.toFixed(2));
-          console.log(`Rejection email sent to ${user.email}`);
         }
 
         // Save notification in DB (optional)

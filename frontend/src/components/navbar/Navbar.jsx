@@ -9,6 +9,7 @@ import img from "../../assets/icons/noavatar.jpg";
 import { AuthContext } from "../../context/AuthContext";
 import { io } from "socket.io-client";
 import PropTypes from 'prop-types';
+import api from "../../lib/api";
 
 const Navbar = ({ showMyComms, setShowMyComms }) => {
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ const Navbar = ({ showMyComms, setShowMyComms }) => {
       socketRef.current.disconnect();
     }
 
-    const socket = io("http://localhost:5000", {
+    const socket = io(api.baseUrl, {
       transports: ["websocket"],
       withCredentials: true,
     });
@@ -127,7 +128,7 @@ const Navbar = ({ showMyComms, setShowMyComms }) => {
   const fetchNotifications = async () => {
     try {
       // Fetch reviewer notifications
-      const reviewerRes = await fetch("http://localhost:5000/communications/reviewer/notifications", {
+      const reviewerRes = await fetch(api.communications.reviewerNotifications(), {
         credentials: "include"
       });
       const reviewerData = await reviewerRes.json();
@@ -135,7 +136,7 @@ const Navbar = ({ showMyComms, setShowMyComms }) => {
       setUnreadCount(reviewerData.filter(n => !n.isRead).length);
       
       // Fetch user notifications
-      const userRes = await fetch("http://localhost:5000/communications/user/notifications", {
+      const userRes = await fetch(api.communications.userNotifications(), {
         credentials: "include"
       });
       const userData = await userRes.json();
@@ -151,7 +152,7 @@ const Navbar = ({ showMyComms, setShowMyComms }) => {
 
   const handleNotifClick = async (notif) => {
     if (!notif.isRead) {
-      await fetch(`http://localhost:5000/communications/reviewer/notifications/${notif.id}/read`, {
+      await fetch(api.communications.markReviewerNotificationRead(notif.id), {
         method: "POST",
         credentials: "include"
       });
@@ -178,7 +179,7 @@ const Navbar = ({ showMyComms, setShowMyComms }) => {
 
   const handleUnifiedNotifClick = async (notif) => {
     if (notif.type === "reviewer" && !notif.isRead) {
-      await fetch(`http://localhost:5000/communications/reviewer/notifications/${notif.id}/read`, {
+      await fetch(api.communications.markReviewerNotificationRead(notif.id), {
         method: "POST",
         credentials: "include"
       });
@@ -187,7 +188,7 @@ const Navbar = ({ showMyComms, setShowMyComms }) => {
       );
     }
     if (notif.type === "user" && !notif.isRead) {
-      await fetch(`http://localhost:5000/communications/user/notifications/${notif.id}/read`, {
+      await fetch(api.communications.markUserNotificationRead(notif.id), {
         method: "POST",
         credentials: "include"
       });
@@ -200,7 +201,7 @@ const Navbar = ({ showMyComms, setShowMyComms }) => {
   const handleMarkAllAsRead = async () => {
     try {
       // Mark reviewer notifications as read
-      await fetch("http://localhost:5000/communications/reviewer/notifications/mark-all-read", {
+      await fetch(api.communications.markAllReviewerNotificationsRead(), {
         method: "POST",
         credentials: "include"
       });
@@ -208,7 +209,7 @@ const Navbar = ({ showMyComms, setShowMyComms }) => {
       setUnreadCount(0);
       
       // Mark user notifications as read
-      await fetch("http://localhost:5000/communications/user/notifications/mark-all-read", {
+      await fetch(api.communications.markAllUserNotificationsRead(), {
         method: "POST",
         credentials: "include"
       });
@@ -220,7 +221,7 @@ const Navbar = ({ showMyComms, setShowMyComms }) => {
   };
 
   const handleLogout = async () => {
-    await fetch("http://localhost:5000/auth/logout", {
+    await fetch(api.auth.logout(), {
       method: "POST",
       credentials: "include",
     });

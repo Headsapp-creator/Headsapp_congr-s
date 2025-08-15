@@ -8,6 +8,7 @@ import "./HomePage.scss";
 import { AuthContext } from "../../context/AuthContext.jsx";
 import PropTypes from "prop-types";
 import MyCommunicationsModal from "../../components/MyCommunicationsModal/MyCommunicationsModal.jsx";
+import api from "../../lib/api";
 
 const HomePage = ({ showMyComms, setShowMyComms }) => {
   const [events, setEvents] = useState([]);
@@ -16,7 +17,7 @@ const HomePage = ({ showMyComms, setShowMyComms }) => {
 
   const navigate = useNavigate();
   useEffect(() => {
-    fetch('http://localhost:5000/events')
+    fetch(api.events.list())
       .then((res) => res.json())
       .then((data) => {
         setEvents(data);

@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { AuthContext } from "../../context/AuthContext";
 import { FiX, FiCheck, FiClock, FiAlertCircle } from "react-icons/fi";
 import "./MyCommunicationsModal.scss";
+import api from "../../lib/api";
 
 const getAverageScore = (comm) => {
   if (!comm.reviewerAssignments || comm.reviewerAssignments.length === 0) return null;
@@ -77,7 +78,7 @@ const MyCommunicationsModal = ({ open, onClose }) => {
   useEffect(() => {
     if (!open) return;
     setLoading(true);
-    fetch("http://localhost:5000/communications/my", {
+    fetch(api.communications.my(), {
       credentials: "include"
     })
       .then(res => res.json())

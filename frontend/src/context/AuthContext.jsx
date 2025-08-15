@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { createContext, useEffect, useState, useCallback, memo } from "react";
+import api from "../lib/api";
 
 const AuthContext = createContext();
 
@@ -10,7 +11,7 @@ const AuthContextProviderComponent = ({ children }) => {
   const fetchUser = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/auth/user", {
+      const response = await fetch(api.auth.user(), {
         method: "GET",
         credentials: "include",
       });

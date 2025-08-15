@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import "./LoginPage.scss";
 import img from "../../assets/hd.png";
 import { AuthContext } from "../../context/AuthContext";
+import api from "../../lib/api";
 const LoginPage = () => {
   const { updateUser } = useContext(AuthContext);
   const [showPassword, setShowPassword] = useState(false);
@@ -21,16 +22,16 @@ const LoginPage = () => {
     setError("");
     setLoading(true);
 
-    try {
-      const response = await fetch("http://localhost:5000/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-      });
-
+    
+        try {
+          const response = await fetch(api.auth.login(), {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({ email, password }),
+          });
       const data = await response.json();
 
       if (!response.ok) {

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import "./EventList.scss";
 import { AuthContext } from "../../context/AuthContext";
+import api from "../../lib/api";
 
 const EventList = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const EventList = () => {
   };
 
   useEffect(() => {
-    fetch("http://localhost:5000/events")
+    fetch(api.events.list())
       .then((res) => res.json())
       .then((data) => setEvents(data))
       .catch((err) => console.error(err));

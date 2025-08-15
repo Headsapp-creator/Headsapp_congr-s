@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import api from "../../lib/api";
 
 const PaymentPage = () => {
   const location = useLocation();
@@ -36,7 +37,7 @@ const PaymentPage = () => {
       return;
     }
 
-    fetch("http://localhost:5000/payments/paymee", {
+    fetch(api.payments.paymee(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

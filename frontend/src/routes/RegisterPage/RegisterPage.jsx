@@ -8,6 +8,7 @@ import * as Yup from "yup";
 import "./RegisterPage.scss";
 import img from "../../assets/hd.png";
 import PasswordStrengthMeter from "../../components/PasswordStrengthMeter/PasswordStrengthMeter";
+import api from "../../lib/api";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -39,9 +40,9 @@ const RegisterPage = () => {
     }),
 
     onSubmit: async (values) => {
-      console.log(values); 
+      console.log(values);
       try {
-        const response = await fetch("http://localhost:5000/auth/signup", {
+        const response = await fetch(api.auth.signup(), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",

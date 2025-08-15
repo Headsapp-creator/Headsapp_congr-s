@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./ReviewerDashboard.scss";
 import { MdDescription, MdStar, MdRemoveRedEye, MdDownload, MdEdit } from "react-icons/md";
+import api from "../../lib/api";
 
 const ReviewerDashboard = () => {
     const [assigned, setAssigned] = useState([]);
@@ -26,7 +27,7 @@ const ReviewerDashboard = () => {
 
     const fetchAssigned = async () => {
         try {
-            const res = await fetch("http://localhost:5000/communications/assigned-to-me", {
+            const res = await fetch(api.communications.assignedToMe(), {
                 credentials: "include"
             });
             const data = await res.json();
@@ -46,7 +47,7 @@ const ReviewerDashboard = () => {
 
     const handleEdit = async (communicationId) => {
         try {
-            const res = await fetch(`http://localhost:5000/communications/content/${communicationId}`, {
+            const res = await fetch(api.communications.content(communicationId), {
                 credentials: "include"
             });
             const data = await res.json();
@@ -73,7 +74,7 @@ const ReviewerDashboard = () => {
 
     const handleSaveEdit = async () => {
         try {
-            const res = await fetch(`http://localhost:5000/communications/modify/${editingCommunicationId}`, {
+            const res = await fetch(api.communications.modify(editingCommunicationId), {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -105,7 +106,7 @@ const ReviewerDashboard = () => {
 
         setIsSubmitting(true);
         try {
-            await fetch(`http://localhost:5000/communications/${selectedAbstract.assignmentId}/set-score`, {
+            await fetch(api.communications.setScore(selectedAbstract.assignmentId), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -130,7 +131,7 @@ const ReviewerDashboard = () => {
 
     const trackAction = async (assignmentId, action) => {
         try {
-            await fetch(`http://localhost:5000/communications/${assignmentId}/track`, {
+            await fetch(api.communications.track(assignmentId), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -148,7 +149,7 @@ const ReviewerDashboard = () => {
 
     const handleDownload = (assignmentId, communicationId) => {
         trackAction(assignmentId, "download");
-        window.open(`http://localhost:5000/communications/download/${communicationId}`, "_blank");
+        window.open(api.communications.download(communicationId), "_blank");
     };
 
     const filteredAbstracts = assigned.filter(item => {
